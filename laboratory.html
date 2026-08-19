@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratory Management</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+}
+
+/* Sidebar */
+
+.sidebar{
+    width:230px;
+    height:100vh;
+    background:#06245c;
+    position:fixed;
+    color:white;
+}
+
+.logo{
+    text-align:center;
+    padding:25px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.sidebar a{
+    display:block;
+    color:white;
+    text-decoration:none;
+    padding:15px 25px;
+}
+
+.sidebar a:hover,
+.sidebar .active{
+    background:#0d47b5;
+}
+
+/* Main */
+
+.main{
+    margin-left:230px;
+    padding:30px;
+}
+
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.header h2{
+    color:#333;
+}
+
+.addBtn{
+    background:#0d6efd;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:5px;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+/* Table */
+
+.table-box{
+    background:white;
+    margin-top:20px;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 2px 8px rgba(0,0,0,.1);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+    padding:15px;
+}
+
+td{
+    padding:15px;
+    text-align:center;
+    border-bottom:1px solid #ddd;
+}
+
+.locked{
+    color:red;
+    font-weight:bold;
+}
+
+.unlocked{
+    color:green;
+    font-weight:bold;
+}
+
+.edit{
+    background:orange;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+.delete{
+    background:red;
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:5px;
+    cursor:pointer;
+}
+
+/* Modal */
+
+.modal{
+    display:none;
+    position:fixed;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,.5);
+}
+
+.modal-content{
+    background:white;
+    width:400px;
+    margin:100px auto;
+    padding:25px;
+    border-radius:10px;
+}
+
+.modal-content h3{
+    margin-bottom:20px;
+}
+
+.modal-content input,
+.modal-content select{
+    width:100%;
+    padding:10px;
+    margin-bottom:15px;
+}
+
+.save{
+    width:100%;
+    padding:10px;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">
+<i class="fa-solid fa-shield-halved fa-3x"></i>
+<h5>SMART ACCESS</h5>
+</div>
+
+<a href="dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+<a href="users.html"><i class="fa fa-users"></i> Users</a>
+<a href="accesslog.html"><i class="fa fa-clock"></i> Access Log</a>
+<a href="laboratory.html"><i class="fa fa-building"></i> Laboratories</a>
+<a href="reports.html"><i class="fa fa-file"></i> Reports</a>
+<a href="notification.html"><i class="fa fa-bell"></i> Notifications</a>
+<a href="settings.html"><i class="fa fa-cog"></i> Settings</a>
+<a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+<a href="login.html"><i class="fa fa-sign-out-alt"></i> Logout</a>
+
+</div>
+
+<div class="main">
+
+<div class="header">
+<h2>Laboratory Management</h2>
+<div>Admin 👤</div>
+</div>
+
+<button class="addBtn" onclick="openModal()">
++ Add New Laboratory
+</button>
+
+<div class="table-box">
+
+<table id="labTable">
+
+<tr>
+<th>Lab ID</th>
+<th>Laboratory</th>
+<th>Location</th>
+<th>Door Status</th>
+<th>Action</th>
+</tr>
+
+<tr>
+<td>LAB001</td>
+<td>Computer Lab 1</td>
+<td>Block A</td>
+<td class="locked">🔒 Locked</td>
+<td>
+<button class="edit">Edit</button>
+<button class="delete" onclick="deleteRow(this)">Delete</button>
+</td>
+</tr>
+
+<tr>
+<td>LAB002</td>
+<td>Computer Lab 2</td>
+<td>Block B</td>
+<td class="unlocked">🔓 Unlocked</td>
+<td>
+<button class="edit">Edit</button>
+<button class="delete" onclick="deleteRow(this)">Delete</button>
+</td>
+</tr>
+
+<tr>
+<td>LAB003</td>
+<td>Electronics Lab</td>
+<td>Block C</td>
+<td class="locked">🔒 Locked</td>
+<td>
+<button class="edit">Edit</button>
+<button class="delete" onclick="deleteRow(this)">Delete</button>
+</td>
+</tr>
+
+</table>
+
+</div>
+
+</div>
+
+<!-- Modal -->
+
+<div class="modal" id="modal">
+
+<div class="modal-content">
+
+<h3>Add New Laboratory</h3>
+
+<input type="text" id="labName" placeholder="Laboratory Name">
+
+<input type="text" id="location" placeholder="Location">
+
+<select id="status">
+<option>Locked</option>
+<option>Unlocked</option>
+</select>
+
+<button class="save" onclick="addLab()">Save</button>
+
+</div>
+
+</div>
+
+<script>
+
+function openModal(){
+document.getElementById("modal").style.display="block";
+}
+
+function addLab(){
+
+let table=document.getElementById("labTable");
+
+let row=table.insertRow();
+
+let id="LAB00"+(table.rows.length-1);
+
+let name=document.getElementById("labName").value;
+
+let location=document.getElementById("location").value;
+
+let status=document.getElementById("status").value;
+
+row.insertCell(0).innerHTML=id;
+row.insertCell(1).innerHTML=name;
+row.insertCell(2).innerHTML=location;
+
+if(status=="Locked"){
+row.insertCell(3).innerHTML="<span class='locked'>🔒 Locked</span>";
+}else{
+row.insertCell(3).innerHTML="<span class='unlocked'>🔓 Unlocked</span>";
+}
+
+row.insertCell(4).innerHTML=
+"<button class='edit'>Edit</button> <button class='delete' onclick='deleteRow(this)'>Delete</button>";
+
+document.getElementById("modal").style.display="none";
+
+document.getElementById("labName").value="";
+document.getElementById("location").value="";
+}
+
+function deleteRow(btn){
+
+let row=btn.parentNode.parentNode;
+
+row.remove();
+
+}
+
+window.onclick=function(e){
+
+let modal=document.getElementById("modal");
+
+if(e.target==modal){
+modal.style.display="none";
+}
+
+}
+
+</script>
+
+</body>
+</html>
