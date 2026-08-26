@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Laboratory Management - Smart Access</title>
+
+<!-- SKRIP SEGERA DALAM HEAD UNTUK ELAK WHITE FLICKER -->
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<style>
+  /* VARIABLE TEMA (DEFAULT LIGHT MODE) */
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #0d6efd;
+    --sidebar-mobile-bg: #021f4b;
+    --table-border: #dee2e6;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --modal-bg: #ffffff;
+  }
+
+  /* DARK MODE OVERRIDES */
+  :root.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1e40af;
+    --sidebar-mobile-bg: #070f1e;
+    --table-border: #333333;
+    --input-bg: #2b2b2b;
+    --input-border: #444444;
+    --modal-bg: #1e1e1e;
+  }
+
+  html {
+    background-color: var(--bg-color);
+  }
+
+  body { 
+    background-color: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0; 
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* SIDEBAR DASHBOARD */
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000; 
+    transition: background 0.3s;
+  }
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+  .logo h5 { margin-top: 10px; }
+  .sidebar-menu { display: block; }
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s; 
+  }
+  .sidebar a:hover, .sidebar a.active { background: var(--sidebar-hover); }
+
+  /* MAIN CONTENT */
+  .content { margin-left: 240px; padding: 20px; }
+
+  .card-box {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* DARK MODE JADUAL & MODAL */
+  html.dark-mode .table {
+    color: var(--text-color);
+    border-color: var(--table-border);
+  }
+  html.dark-mode .table th, 
+  html.dark-mode .table td {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--table-border);
+  }
+
+  html.dark-mode .modal-content {
+    background-color: var(--modal-bg);
+    color: var(--text-color);
+    border-color: var(--table-border);
+  }
+  html.dark-mode .modal-header,
+  html.dark-mode .modal-footer {
+    border-color: var(--table-border);
+  }
+  html.dark-mode .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+
+  html.dark-mode .form-control,
+  html.dark-mode .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--input-border);
+  }
+
+  /* RESPONSIVE TELEFON (< 992px) */
+  @media (max-width: 991.98px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .logo { padding: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .logo i { font-size: 1.8rem !important; }
+    .logo h5 { margin: 0; font-size: 1.1rem; }
+    .sidebar-menu { display: flex; overflow-x: auto; white-space: nowrap; background: var(--sidebar-mobile-bg); padding: 5px 0; }
+    .sidebar a { padding: 10px 15px; font-size: 0.9rem; }
+    .content { margin-left: 0; padding: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR DASHBOARD -->
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="users.html"><i class="fa fa-users"></i> Users</a>
+    <a href="accesslog.html"><i class="fa fa-clock"></i> Access Log</a>
+    <a href="laboratory.html" class="active"><i class="fa fa-building"></i> Laboratories</a>
+    <a href="reports.html"><i class="fa fa-file"></i> Reports</a>
+    <a href="notification.html"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="settings.html"><i class="fa fa-cog"></i> Settings</a>
+    <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="logout.html" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h3 class="mb-0">Laboratory Management</h3>
+    <div>Admin 👤</div>
+  </div>
+
+  <div class="card-box">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h5 class="m-0 fw-semibold">Laboratories & Door Lock Control</h5>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLabModal">
+        <i class="fa fa-plus me-1"></i> Add New Lab
+      </button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle text-center mb-0">
+        <thead class="table-primary">
+          <tr>
+            <th>Lab ID</th>
+            <th>Lab Name</th>
+            <th>Location</th>
+            <th>Door Status</th>
+            <th>Toggle Access</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="labTable">
+          <tr><td colspan="6" class="text-muted">Loading laboratory records...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODAL ADD LAB -->
+<div class="modal fade" id="addLabModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Add New Laboratory</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="labId" class="form-control mb-3" placeholder="Lab ID (e.g. LAB-01)">
+        <input type="text" id="labName" class="form-control mb-3" placeholder="Lab Name (e.g. Cybersecurity Lab)">
+        <input type="text" id="labLocation" class="form-control mb-3" placeholder="Location / Block (e.g. Block B, Level 2)">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary" id="saveLabBtn">Save Laboratory</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- SCRIPT FIREBASE -->
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, set, onValue, remove, update } from './firebase-config.js';
+
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+    document.body.classList.add("dark-mode");
+  }
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+    }
+  });
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      });
+    });
+  }
+
+  // PAPARAN DATA MAKMAL REALTIME
+  const labRef = ref(db, 'laboratories');
+
+  onValue(labRef, (snapshot) => {
+    const table = document.getElementById("labTable");
+    table.innerHTML = "";
+    const data = snapshot.val();
+
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        const lab = data[key];
+        const isUnlocked = lab.status === "Unlocked" || lab.status === "Open";
+        const badgeClass = isUnlocked ? "bg-success" : "bg-danger";
+        const btnClass = isUnlocked ? "btn-warning" : "btn-success";
+        const btnText = isUnlocked ? "Lock Door" : "Unlock Door";
+        const nextStatus = isUnlocked ? "Locked" : "Unlocked";
+
+        table.innerHTML += `
+          <tr>
+            <td><code>${lab.labId || key}</code></td>
+            <td>${lab.name || 'N/A'}</td>
+            <td>${lab.location || 'N/A'}</td>
+            <td><span class="badge ${badgeClass}">${lab.status || 'Locked'}</span></td>
+            <td>
+              <button class="btn ${btnClass} btn-sm" onclick="toggleDoorStatus('${key}', '${nextStatus}')">
+                <i class="fa ${isUnlocked ? 'fa-lock' : 'fa-unlock'} me-1"></i> ${btnText}
+              </button>
+            </td>
+            <td>
+              <button class="btn btn-danger btn-sm" onclick="deleteLab('${key}')">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>`;
+      });
+    } else {
+      table.innerHTML = `<tr><td colspan="6" class="text-muted">No laboratories registered</td></tr>`;
+    }
+  });
+
+  // TAMBAH MAKMAL BAHARU
+  document.getElementById("saveLabBtn").addEventListener("click", () => {
+    const labId = document.getElementById("labId").value.trim();
+    const labName = document.getElementById("labName").value.trim();
+    const labLocation = document.getElementById("labLocation").value.trim();
+
+    if (!labId || !labName) return alert("Please fill Lab ID and Lab Name!");
+
+    set(ref(db, `laboratories/${labId}`), {
+      labId: labId,
+      name: labName,
+      location: labLocation,
+      status: "Locked",
+      updatedAt: Date.now()
+    }).then(() => {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('addLabModal'));
+      modal.hide();
+      document.getElementById("labId").value = "";
+      document.getElementById("labName").value = "";
+      document.getElementById("labLocation").value = "";
+    }).catch((err) => {
+      console.error("Error adding lab:", err);
+      alert("Failed to add laboratory.");
+    });
+  });
+
+  // TUKAR STATUS PINTU (LOCK / UNLOCK)
+  window.toggleDoorStatus = function(key, nextStatus) {
+    update(ref(db, `laboratories/${key}`), {
+      status: nextStatus,
+      updatedAt: Date.now()
+    });
+  };
+
+  // PADAM MAKMAL
+  window.deleteLab = function(key) {
+    if (confirm("Are you sure you want to delete this laboratory?")) {
+      remove(ref(db, `laboratories/${key}`));
+    }
+  };
+</script>
+
+</body>
+</html>
