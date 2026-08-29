@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Help Assistant - Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #0d6efd;
+    --border-color: #dee2e6;
+    --subtext-color: #6c757d;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+    --chat-bg-user: #0d6efd;
+    --chat-text-user: #ffffff;
+    --chat-bg-bot: #e9ecef;
+    --chat-text-bot: #212529;
+  }
+
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1e40af;
+    --border-color: #333333;
+    --subtext-color: #aaa;
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+    --chat-bg-user: #1d4ed8;
+    --chat-text-user: #ffffff;
+    --chat-bg-bot: #2a2a2a;
+    --chat-text-bot: #e0e0e0;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    transition: background 0.3s;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { margin-top: 10px; }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  /* CHAT CONTAINER STYLES */
+  .chat-container {
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    transition: background 0.3s, border-color 0.3s;
+    border: 1px solid var(--border-color);
+  }
+
+  .chat-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .message {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .message.bot {
+    background: var(--chat-bg-bot);
+    color: var(--chat-text-bot);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+  }
+
+  .message.user {
+    background: var(--chat-bg-user);
+    color: var(--chat-text-user);
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+
+  .chat-input-area {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .form-control {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+  }
+
+  .form-control:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: #0d6efd;
+    box-shadow: none;
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .content { margin-left: 0; padding: 15px; }
+    .chat-container { height: calc(100vh - 220px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="user-dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="user-labs.html"><i class="fa fa-door-open"></i> Status Makmal</a>
+    <a href="user-booking.html"><i class="fa fa-calendar-plus"></i> Lab Booking</a>
+    <a href="user-notifications.html"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="user-profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="user-settings.html"><i class="fa fa-gear"></i> Settings</a>
+    <a href="user-help.html" class="active"><i class="fa fa-robot"></i> AI Help Bot</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<div class="content">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">AI Assistant</h3>
+      <p class="text-muted small mb-0">Tanya apa sahaja berkaitan sistem Smart Access.</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <!-- Butang Suis Mod Gelap/Cerah -->
+      <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 38px; height: 38px;" title="Tukar Mod Paparan">
+        <i class="fa fa-moon" id="themeIcon"></i>
+      </button>
+      <div id="userHeaderName" class="fw-bold text-primary">User 👤</div>
+    </div>
+  </div>
+
+  <!-- Reka Bentuk Kotak Sembang (Chat UI) -->
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+        <i class="fa fa-robot"></i>
+      </div>
+      <div>
+        <h6 class="mb-0 fw-bold">SmartBot AI</h6>
+        <small class="text-success"><i class="fa fa-circle fs-7 me-1"></i>Sedia membantu</small>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        Hai! Saya pembantu maya Smart Access. Ada apa-apa yang boleh saya bantu mengenai tempahan makmal, kad RFID, atau peraturan keselamatan sistem kita hari ini?
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <form id="chatForm" class="d-flex gap-2">
+        <input type="text" id="chatInput" class="form-control" placeholder="Taip soalan anda di sini..." autocomplete="off" required>
+        <button type="submit" class="btn btn-primary px-4" id="sendBtn">
+          <i class="fa fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child } from './firebase-config.js';
+
+  // Logik Pengurusan Mod Gelap / Cerah (Dark/Light Mode Toggle)
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const themeIcon = document.getElementById("themeIcon");
+
+  function updateThemeUI(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add("dark-mode");
+      document.body.classList.add("dark-mode");
+      themeIcon.classList.remove("fa-moon");
+      themeIcon.classList.add("fa-sun");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+      document.body.classList.remove("dark-mode");
+      themeIcon.classList.remove("fa-sun");
+      themeIcon.classList.add("fa-moon");
+    }
+  }
+
+  // Semak tetapan awal dari localStorage
+  if (localStorage.getItem("theme") === "dark") {
+    updateThemeUI(true);
+  } else {
+    updateThemeUI(false);
+  }
+
+  // Fungsi interaktif apabila butang tema ditekan
+  themeToggleBtn.addEventListener("click", () => {
+    const isCurrentlyDark = document.documentElement.classList.contains("dark-mode");
+    if (isCurrentlyDark) {
+      localStorage.setItem("theme", "light");
+      updateThemeUI(false);
+    } else {
+      localStorage.setItem("theme", "dark");
+      updateThemeUI(true);
+    }
+  });
+
+  // Masukkan API Key Gemini anda di sini jika mahu sambungkan terus ke Google Gemini API
+  const GEMINI_API_KEY = ""; 
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let userName = user.displayName || 'User';
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists() && snapshot.val().name) {
+      userName = snapshot.val().name;
+    } else {
+      const allUsersSnap = await get(child(dbRef, 'users'));
+      if (allUsersSnap.exists()) {
+        const allUsers = allUsersSnap.val();
+        Object.keys(allUsers).forEach(key => {
+          if (allUsers[key].email && allUsers[key].email.toLowerCase() === user.email.toLowerCase()) {
+            if (allUsers[key].name) userName = allUsers[key].name;
+          }
+        });
+      }
+    }
+
+    document.getElementById("userHeaderName").innerText = `${userName} 👤`;
+  });
+
+  // Logik Interaksi Sembang (Chat Logic)
+  const chatForm = document.getElementById("chatForm");
+  const chatInput = document.getElementById("chatInput");
+  const chatMessages = document.getElementById("chatMessages");
+
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const question = chatInput.value.trim();
+    if (!question) return;
+
+    // Paparkan mesej pengguna
+    appendMessage(question, "user");
+    chatInput.value = "";
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // Paparkan status 'Sedang menaip...'
+    const typingId = appendMessage("SmartBot sedang menaip...", "bot text-muted fst-italic");
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    let botReply = "";
+
+    try {
+      if (GEMINI_API_KEY) {
+        // Panggilan ke Gemini API sekiranya kunci API disediakan
+        botReply = await fetchGeminiResponse(question);
+      } else {
+        // Sistem fallback pintar berdasarkan kata kunci jika tiada API key
+        botReply = getSmartFallbackResponse(question);
+      }
+    } catch (err) {
+      botReply = "Maaf, berlaku ralat semasa memproses permintaan anda. Sila cuba lagi kemudian.";
+    }
+
+    // Buang mesej menaip dan masukkan jawapan sebenar bot
+    document.getElementById(typingId).remove();
+    appendMessage(botReply, "bot");
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  function appendMessage(text, className) {
+    const id = "msg-" + Date.now() + Math.random();
+    const div = document.createElement("div");
+    div.id = id;
+    div.className = `message ${className}`;
+    div.innerText = text;
+    chatMessages.appendChild(div);
+    return id;
+  }
+
+  // Fungsi Logik Pintar Asas (Digunakan jika tiada Gemini API key lagi)
+  function getSmartFallbackResponse(q) {
+    const query = q.toLowerCase();
+
+    if (query.includes("rfid") || query.includes("kad") || query.includes("pintu") || query.includes("denied")) {
+      return "Untuk isu kad RFID atau status 'Denied' pada pintu makmal, pastikan kad anda telah didaftarkan oleh pentadbir dan anda mempunyai kebenaran akses ke makmal tersebut. Hubungi admin jika kad anda rosak.";
+    } 
+    else if (query.includes("tempah") || query.includes("booking") || query.includes("slot")) {
+      return "Anda boleh membuat tempahan makmal melalui menu 'Lab Booking' di sebelah kiri. Pilih tarikh, masa, dan makmal yang diinginkan, kemudian hantar permohonan untuk kelulusan admin.";
+    } 
+    else if (query.includes("notifikasi") || query.includes("lulus") || query.includes("status")) {
+      return "Status permohonan tempahan anda (sama ada Diluluskan atau Ditolak) boleh disemak secara langsung di menu 'Notifications' atau pada halaman utama Dashboard.";
+    } 
+    else if (query.includes("kata laluan") || query.includes("password") || query.includes("reset")) {
+      return "Untuk menukar kata laluan akaun anda, pergi ke menu 'Profile' dan klik butang 'Mohon Reset Kata Laluan'. Pautan akan dihantar ke emel anda.";
+    } 
+    else if (query.includes("admin") || query.includes("hubungi") || query.includes("support") || query.includes("telefon")) {
+      return "Anda boleh menghubungi pentadbir sistem melalui emel support@smartaccess.edu.my atau hubungi talian pejabat di +603-55443322 pada waktu pejabat.";
+    } 
+    else {
+      return "Soalan yang menarik! Berdasarkan sistem Smart Access, anda boleh menguruskan tempahan makmal, menyemak log akses peribadi, dan mengemas kini profil anda melalui menu di sebelah kiri. Adakah anda ingin tahu mengenai prosedur tempahan atau status RFID?";
+    }
+  }
+
+  // Fungsi Optional untuk integrasi terus dengan Gemini API
+  async function fetchGeminiResponse(prompt) {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: `Anda adalah pembantu maya rasmi untuk portal sistem keselamatan makmal universiti bernama 'Smart Access'. Jawab soalan pengguna ini secara ringkas, mesra, dan tepat dalam Bahasa Melayu: ${prompt}` }]
+        }]
+      })
+    });
+    const data = await response.json();
+    return data.candidates[0].content.parts[0].text;
+  }
+
+  // Log Keluar
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => window.location.href = "index.html");
+    });
+  }
+</script>
+
+</body>
+</html>

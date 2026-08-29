@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengurusan Tempahan - Admin Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #0d6efd;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+    --table-text: #212529;
+  }
+
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1e40af;
+    --border-color: #333333;
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+    --table-text: #e0e0e0;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    transition: background 0.3s;
+    overflow-y: auto;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { margin-top: 10px; }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  .card-container {
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .table {
+    color: var(--table-text);
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .content { margin-left: 0; padding: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="users.html"><i class="fa fa-users"></i> Users</a>
+    <a href="booking.html"><i class="fa fa-calendar-check"></i> Bookings</a>
+    <a href="accesslog.html"><i class="fa fa-clock"></i> Access Log</a>
+    <a href="laboratory.html"><i class="fa fa-building"></i> Laboratories</a>
+    <a href="reports.html"><i class="fa fa-file"></i> Reports</a>
+    <a href="notification.html"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="help.html"><i class="fa fa-robot"></i> AI Assistant</a>
+    <a href="settings.html"><i class="fa fa-cog"></i> Settings</a>
+    <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<div class="content">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">Pengurusan Tempahan Makmal</h3>
+      <p class="text-muted small mb-0">Semak dan luluskan permohonan tempahan daripada pengguna.</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 38px; height: 38px;" title="Tukar Mod Paparan">
+        <i class="fa fa-moon" id="themeIcon"></i>
+      </button>
+      <div id="adminHeaderName" class="fw-bold text-primary">Admin 🛡️</div>
+  </div>
+  </div>
+
+  <!-- Jadual Senarai Tempahan -->
+  <div class="card-container">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Pengguna</th>
+            <th>Makmal</th>
+            <th>Tarikh & Masa</th>
+            <th>Tujuan</th>
+            <th>Status</th>
+            <th class="text-center">Tindakan</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsTableBody">
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">Memuatkan senarai tempahan...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- SKRIP AUTOMATIK MENYALAKAN SIDEBAR MENGIKUT PAGE -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname.split("/").pop();
+    const sidebarLinks = document.querySelectorAll(".sidebar-menu a");
+
+    sidebarLinks.forEach(link => {
+      const href = link.getAttribute("href");
+      if (href === currentPath) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child, update, onValue } from './firebase-config.js';
+
+  // Pengurusan Mod Gelap / Cerah
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const themeIcon = document.getElementById("themeIcon");
+
+  function updateThemeUI(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add("dark-mode");
+      document.body.classList.add("dark-mode");
+      themeIcon.classList.remove("fa-moon");
+      themeIcon.classList.add("fa-sun");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+      document.body.classList.remove("dark-mode");
+      themeIcon.classList.remove("fa-sun");
+      themeIcon.classList.add("fa-moon");
+    }
+  }
+
+  if (localStorage.getItem("theme") === "dark") {
+    updateThemeUI(true);
+  } else {
+    updateThemeUI(false);
+  }
+
+  themeToggleBtn.addEventListener("click", () => {
+    const isDark = document.documentElement.classList.contains("dark-mode");
+    localStorage.setItem("theme", isDark ? "light" : "dark");
+    updateThemeUI(!isDark);
+  });
+
+  // Semak Autentikasi Admin
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let adminName = user.displayName || 'Admin';
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists() && snapshot.val().name) {
+      adminName = snapshot.val().name;
+    }
+
+    document.getElementById("adminHeaderName").innerText = `${adminName} 🛡️`;
+    loadBookingsData();
+  });
+
+  // Muat Data Tempahan dari Firebase secara Real-time
+  function loadBookingsData() {
+    const bookingsRef = ref(db, 'bookings');
+    onValue(bookingsRef, (snapshot) => {
+      const tbody = document.getElementById("bookingsTableBody");
+      tbody.innerHTML = "";
+
+      if (!snapshot.exists()) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Tiada permohonan tempahan ditemui.</td></tr>`;
+        return;
+      }
+
+      const bookingsData = snapshot.val();
+      Object.keys(bookingsData).forEach(bookingId => {
+        const item = bookingsData[bookingId];
+        const status = (item.status || 'pending').toLowerCase();
+
+        let badgeClass = 'bg-warning text-dark';
+        let statusText = 'Menunggu (Pending)';
+        if (status === 'approved' || status === 'diluluskan') {
+          badgeClass = 'bg-success';
+          statusText = 'Diluluskan (Approved)';
+        } else if (status === 'rejected' || status === 'ditolak') {
+          badgeClass = 'bg-danger';
+          statusText = 'Ditolak (Rejected)';
+        }
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <div class="fw-bold">${item.userName || item.userEmail || 'Pengguna'}</div>
+              <small class="text-muted">${item.userEmail || ''}</small>
+            </td>
+            <td>${item.labName || item.lab || 'Makmal'}</td>
+            <td>
+              <div>${item.date || 'N/A'}</div>
+              <small class="text-muted">${item.timeSlot || item.time || ''}</small>
+            </td>
+            <td>${item.purpose || item.reason || 'Tiada catatan'}</td>
+            <td><span class="badge ${badgeClass}">${statusText}</span></td>
+            <td class="text-center">
+              ${status === 'pending' ? `
+                <button onclick="window.updateStatus('${bookingId}', 'approved')" class="btn btn-sm btn-success me-1" title="Luluskan">
+                  <i class="fa fa-check"></i>
+                </button>
+                <button onclick="window.updateStatus('${bookingId}', 'rejected')" class="btn btn-sm btn-danger" title="Tolak">
+                  <i class="fa fa-xmark"></i>
+                </button>
+              ` : `
+                <button onclick="window.updateStatus('${bookingId}', 'pending')" class="btn btn-sm btn-outline-secondary" title="Tetapkan Semula ke Pending">
+                  <i class="fa fa-rotate-left"></i> Semula
+                </button>
+              `}
+            </td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  // Fungsi Global untuk Tukar Status Tempahan di Firebase
+  window.updateStatus = async function(bookingId, newStatus) {
+    const actionText = newStatus === 'approved' ? 'meluluskan' : (newStatus === 'rejected' ? 'menolak' : 'menetapkan semula');
+    if (confirm(`Adakah anda pasti mahu ${actionText} tempahan ini?`)) {
+      try {
+        const bookingRef = ref(db, `bookings/${bookingId}`);
+        await update(bookingRef, { status: newStatus });
+      } catch (error) {
+        console.error("Ralat kemas kini status:", error);
+        alert("Gagal mengemaskini status tempahan.");
+      }
+    }
+  };
+
+  // Log Keluar
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => window.location.href = "index.html");
+    });
+  }
+</script>
+
+</body>
+</html>

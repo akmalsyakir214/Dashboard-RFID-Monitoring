@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings - Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<!-- SKRIP PENCEGAH FLICKER -->
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  /* VARIABLE TEMA (DEFAULT LIGHT MODE) */
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #3b82f6;
+    --sidebar-mobile-bg: #021f4b;
+    --border-color: #dee2e6;
+    --subtext-color: #6c757d;
+  }
+
+  /* DARK MODE OVERRIDES */
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1d4ed8;
+    --sidebar-mobile-bg: #070f1e;
+    --border-color: #333333;
+    --subtext-color: #aaa;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* SIDEBAR DASHBOARD */
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { 
+    margin-top: 10px; 
+  }
+
+  .sidebar-menu {
+    display: block;
+  }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  /* MAIN CONTENT */
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  .settings-card {
+    background: var(--card-bg);
+    color: var(--text-color);
+    padding: 25px;
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.3s, color 0.3s;
+    margin-bottom: 20px;
+  }
+
+  /* RESPONSIVE UNTUK TELEFON (< 992px) */
+  @media (max-width: 991.98px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      background: var(--sidebar-mobile-bg);
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR DASHBOARD (USER VERSION) -->
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="user-dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="user-labs.html"><i class="fa fa-door-open"></i> Status Makmal</a>
+    <a href="user-booking.html"><i class="fa fa-calendar-plus"></i> Lab Booking</a>
+    <a href="user-notifications.html"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="user-profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="user-settings.html" class="active"><i class="fa fa-gear"></i> Settings</a>
+    <a href="user-help.html"><i class="fa fa-robot"></i> AI Help Bot</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">System Settings</h3>
+      <p class="text-muted small mb-0">Urus tetapan akaun, paparan, dan keutamaan notifikasi sistem.</p>
+    </div>
+    <div id="userHeaderName" class="fw-bold text-primary">User 👤</div>
+  </div>
+
+  <!-- APPEARANCE / DARK MODE SETTINGS -->
+  <div class="settings-card">
+    <h5 class="fw-bold mb-3"><i class="fa fa-palette me-2 text-primary"></i>Appearance Settings</h5>
+    <div class="d-flex justify-content-between align-items-center py-2">
+      <div>
+        <h6 class="mb-1">Dark Mode</h6>
+        <p class="text-muted small mb-0">Switch between light and dark themes across all pages.</p>
+      </div>
+      <div class="form-check form-switch fs-4">
+        <input class="form-check-input" type="checkbox" role="switch" id="darkModeToggle">
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION PREFERENCES -->
+  <div class="settings-card">
+    <h5 class="fw-bold mb-3"><i class="fa fa-bell me-2 text-primary"></i>Notification Preferences</h5>
+    <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+      <div>
+        <h6 class="mb-1">Booking Status Updates</h6>
+        <p class="text-muted small mb-0">Receive email alerts when your lab bookings are approved or rejected.</p>
+      </div>
+      <div class="form-check form-switch fs-4">
+        <input class="form-check-input" type="checkbox" role="switch" id="emailAlertToggle">
+      </div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center py-2 mt-2">
+      <div>
+        <h6 class="mb-1">Announcement Notifications</h6>
+        <p class="text-muted small mb-0">Receive system-wide broadcast messages from administrators.</p>
+      </div>
+      <div class="form-check form-switch fs-4">
+        <input class="form-check-input" type="checkbox" role="switch" id="dailyLogToggle">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child, update } from './firebase-config.js';
+
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+    document.body.classList.add("dark-mode");
+  }
+
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  const emailAlertToggle = document.getElementById("emailAlertToggle");
+  const dailyLogToggle = document.getElementById("dailyLogToggle");
+  let currentUserUid = null;
+
+  // 1. SINKRONKAN SWITCH DARK MODE DENGAN LOCALSTORAGE
+  if (localStorage.getItem("theme") === "dark") {
+    darkModeToggle.checked = true;
+  }
+
+  // 2. EVENT TOGGLE MOD GELAP
+  darkModeToggle.addEventListener("change", function () {
+    if (this.checked) {
+      document.documentElement.classList.add("dark-mode");
+      document.body.classList.add("dark-mode");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+      document.body.classList.remove("dark-mode");
+      localStorage.setItem("theme", "light");
+    }
+  });
+
+  // 3. SEMAKAN KESELAMATAN & PAPAR NAMA USER
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let userName = user.displayName || user.email || 'User';
+    let targetUid = user.uid;
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.name) userName = data.name;
+    } else {
+      const allUsersSnap = await get(child(dbRef, 'users'));
+      if (allUsersSnap.exists()) {
+        const allUsers = allUsersSnap.val();
+        Object.keys(allUsers).forEach(key => {
+          if (allUsers[key].email && allUsers[key].email.toLowerCase() === user.email.toLowerCase()) {
+            targetUid = key;
+            if (allUsers[key].name) userName = allUsers[key].name;
+          }
+        });
+      }
+    }
+
+    currentUserUid = targetUid;
+    document.getElementById("userHeaderName").innerText = `${userName} 👤`;
+
+    // 4. MUATKAN TETAPAN DARIPADA FIREBASE
+    const settingsSnap = await get(child(dbRef, `settings/${targetUid}`));
+    if (settingsSnap.exists()) {
+      const settings = settingsSnap.val();
+      emailAlertToggle.checked = settings.emailAlerts ?? true;
+      dailyLogToggle.checked = settings.dailyLogSummaries ?? false;
+    } else {
+      emailAlertToggle.checked = true;
+      dailyLogToggle.checked = false;
+    }
+  });
+
+  // 5. SIMPAN PREFERENSI NOTIFIKASI KE FIREBASE
+  const saveSettingsToFirebase = () => {
+    if (!currentUserUid) return;
+    update(ref(db, `settings/${currentUserUid}`), {
+      emailAlerts: emailAlertToggle.checked,
+      dailyLogSummaries: dailyLogToggle.checked,
+      updatedAt: new Date().toISOString()
+    }).catch(err => {
+      console.error("Gagal menyimpan tetapan:", err);
+    });
+  };
+
+  emailAlertToggle.addEventListener("change", saveSettingsToFirebase);
+  dailyLogToggle.addEventListener("change", saveSettingsToFirebase);
+
+  // 6. LOGOUT FIREBASE
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      }).catch(err => {
+        console.error("Logout error:", err);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>

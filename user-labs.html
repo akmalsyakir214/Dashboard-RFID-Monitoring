@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status Makmal & Jadual - Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #3b82f6;
+    --sidebar-mobile-bg: #021f4b;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+  }
+
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1d4ed8;
+    --sidebar-mobile-bg: #070f1e;
+    --border-color: #333333;
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+  }
+
+  .logo { text-align: center; padding: 20px; border-bottom: 1px solid rgba(255,255,255,.2); }
+  .logo h5 { margin-top: 10px; }
+  .sidebar a { display: block; color: white; text-decoration: none; padding: 12px 20px; transition: background 0.2s; }
+  .sidebar a:hover, .sidebar a.active { background: var(--sidebar-hover); }
+
+  .content { margin-left: 240px; padding: 20px; }
+
+  .lab-card, .timetable-card {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .lab-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+
+  .form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+  }
+
+  .form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+  }
+
+  .pulse-available {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #198754;
+    box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7);
+    animation: pulse-green 1.5s infinite;
+  }
+
+  .pulse-occupied {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+    animation: pulse-red 1.5s infinite;
+  }
+
+  @keyframes pulse-green {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(25, 135, 84, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+  }
+
+  @keyframes pulse-red {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 53, 69, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .content { margin-left: 0; padding: 15px; }
+    .sidebar-menu { display: flex; overflow-x: auto; white-space: nowrap; background: var(--sidebar-mobile-bg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="user-dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="user-labs.html" class="active"><i class="fa fa-door-open"></i> Status Makmal</a>
+    <a href="user-booking.html"><i class="fa fa-calendar-plus"></i> Lab Booking</a>
+    <a href="user-notifications.html"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="user-profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="user-settings.html"><i class="fa fa-gear"></i> Settings</a>
+    <a href="user-help.html"><i class="fa fa-robot"></i> AI Help Bot</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<div class="content">
+  <!-- Top Bar -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">Status Makmal Realtime & Jadual</h3>
+      <p class="text-muted small mb-0">Pemantauan status ketersediaan makmal dan semakan jadual tempahan.</p>
+    </div>
+    <div id="userHeaderName" class="fw-bold text-primary">User 👤</div>
+  </div>
+
+  <!-- Search & Filter Controls -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-8">
+      <div class="input-group">
+        <span class="input-group-text"><i class="fa fa-search"></i></span>
+        <input type="text" id="searchInput" class="form-control" placeholder="Cari mengikut nama makmal atau lokasi...">
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <select id="statusFilter" class="form-select">
+        <option value="all">Semua Status</option>
+        <option value="available">Kosong (Available)</option>
+        <option value="occupied">Ada Orang (Occupied)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Lab Cards Grid -->
+  <div class="row g-4 mb-5" id="labStatusContainer">
+    <div class="col-12 text-center text-muted py-5">
+      <i class="fa fa-spinner fa-spin fa-2x mb-2"></i>
+      <div>Memuatkan status makmal...</div>
+    </div>
+  </div>
+
+  <!-- Jadual Waktu / Kalendar Interaktif Mingguan -->
+  <div class="timetable-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h5 class="fw-bold mb-1"><i class="fa fa-calendar-alt text-primary me-2"></i> Jadual Ketersediaan & Slot Tempahan Makmal</h5>
+        <p class="text-muted small mb-0">Slot masa yang telah diluluskan untuk tempahan lain (Elakkan bertindih masa).</p>
+      </div>
+      <div>
+        <select id="labFilterSelect" class="form-select form-select-sm">
+          <option value="all">Semua Makmal</option>
+        </select>
+      </div>
+    </div>
+    <hr class="text-muted">
+    <div class="table-responsive">
+      <table class="table table-bordered text-center align-middle mb-0">
+        <thead class="table-dark">
+          <tr>
+            <th>Tarikh / Masa</th>
+            <th>Makmal</th>
+            <th>Pemohon / Tujuan</th>
+            <th>Status Slot</th>
+          </tr>
+        </thead>
+        <tbody id="timetableBody">
+          <tr>
+            <td colspan="4" class="text-muted py-4">Memuatkan jadual slot...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child, onValue } from './firebase-config.js';
+
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+    document.body.classList.add("dark-mode");
+  }
+
+  let allLabsData = [];
+  let allBookingsData = [];
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let userName = user.displayName || user.email || 'User';
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists() && snapshot.val().name) {
+      userName = snapshot.val().name;
+    }
+
+    document.getElementById("userHeaderName").innerText = `${userName} 👤`;
+
+    listenLabStatus();
+    listenBookingsAndTimetable();
+  });
+
+  // Fungsi 1: Pantau Status Makmal Realtime
+  function listenLabStatus() {
+    const labsRef = ref(db, 'labs');
+    onValue(labsRef, (snapshot) => {
+      allLabsData = [];
+      const labSelect = document.getElementById("labFilterSelect");
+      labSelect.innerHTML = `<option value="all">Semua Makmal</option>`;
+
+      if (snapshot.exists()) {
+        const labs = snapshot.val();
+        Object.keys(labs).forEach(key => {
+          const labObj = { id: key, ...labs[key] };
+          allLabsData.push(labObj);
+          
+          labSelect.innerHTML += `<option value="${labObj.name || key}">${labObj.name || key}</option>`;
+        });
+      }
+
+      renderLabCards(allLabsData);
+    });
+  }
+
+  function renderLabCards(labs) {
+    const container = document.getElementById("labStatusContainer");
+    container.innerHTML = "";
+
+    if (labs.length === 0) {
+      container.innerHTML = `<div class="col-12 text-center text-muted py-5">Tiada makmal ditemui.</div>`;
+      return;
+    }
+
+    labs.forEach(lab => {
+      const isOccupied = (lab.status || '').toLowerCase() === 'occupied' || lab.isOccupied === true || lab.currentOccupancy > 0;
+      
+      const badgeClass = isOccupied ? 'bg-danger' : 'bg-success';
+      const pulseClass = isOccupied ? 'pulse-occupied' : 'pulse-available';
+      const statusText = isOccupied ? 'Ada Orang' : 'Kosong';
+      const icon = isOccupied ? 'fa-user-lock text-danger' : 'fa-door-open text-success';
+
+      container.innerHTML += `
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="lab-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0"><i class="fa ${icon} me-2"></i>${lab.name || lab.id}</h5>
+              <span class="badge ${badgeClass} d-flex align-items-center gap-2 px-3 py-2">
+                <span class="${pulseClass}"></span> ${statusText}
+              </span>
+            </div>
+            <hr class="my-2 text-muted">
+            <div class="small">
+              <div class="mb-2"><i class="fa fa-building me-2 text-primary"></i> <strong>Lokasi:</strong> ${lab.location || 'N/A'}</div>
+              <div class="mb-2"><i class="fa fa-users me-2 text-primary"></i> <strong>Pengguna Semasa:</strong> ${lab.currentOccupancy || 0} orang</div>
+              <div><i class="fa fa-chair me-2 text-primary"></i> <strong>Kapasiti Maksimum:</strong> ${lab.capacity || 30} kerusi</div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function filterLabs() {
+    const searchVal = document.getElementById("searchInput").value.toLowerCase();
+    const statusVal = document.getElementById("statusFilter").value;
+
+    const filtered = allLabsData.filter(lab => {
+      const name = (lab.name || lab.id || '').toLowerCase();
+      const location = (lab.location || '').toLowerCase();
+      const isOccupied = (lab.status || '').toLowerCase() === 'occupied' || lab.isOccupied === true || lab.currentOccupancy > 0;
+
+      const matchesSearch = name.includes(searchVal) || location.includes(searchVal);
+      let matchesStatus = true;
+
+      if (statusVal === 'available') {
+        matchesStatus = !isOccupied;
+      } else if (statusVal === 'occupied') {
+        matchesStatus = isOccupied;
+      }
+
+      return matchesSearch && matchesStatus;
+    });
+
+    renderLabCards(filtered);
+  }
+
+  // Fungsi 2: Tarik Data Tempahan untuk Jadual Waktu Visual
+  function listenBookingsAndTimetable() {
+    const bookingsRef = ref(db, 'lab_requests');
+    onValue(bookingsRef, (snapshot) => {
+      allBookingsData = [];
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        Object.keys(data).forEach(key => {
+          allBookingsData.push({ id: key, ...data[key] });
+        });
+      }
+      renderTimetable(allBookingsData);
+    });
+  }
+
+  function renderTimetable(bookings) {
+    const tbody = document.getElementById("timetableBody");
+    const selectedLabFilter = document.getElementById("labFilterSelect").value;
+    tbody.innerHTML = "";
+
+    const approvedBookings = bookings.filter(b => {
+      const status = (b.status || '').toLowerCase();
+      const isApproved = status === 'approved' || status === 'diluluskan';
+      
+      if (!isApproved) return false;
+
+      if (selectedLabFilter !== 'all') {
+        const labName = (b.labName || b.lab || '').toLowerCase();
+        return labName.includes(selectedLabFilter.toLowerCase());
+      }
+      return true;
+    });
+
+    if (approvedBookings.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" class="text-muted py-4">Tiada slot tempahan aktif atau diluluskan buat masa ini.</td></tr>`;
+      return;
+    }
+
+    approvedBookings.forEach(item => {
+      const dateStr = item.date || item.tarikh || 'Tarikh tidak dinyatakan';
+      const timeStr = item.time || item.masa || item.slot || 'Masa penuh';
+      const labName = item.labName || item.lab || 'Makmal Am';
+      const applicant = item.userName || item.name || item.userEmail || 'Pengguna';
+      const purpose = item.purpose || item.reason || 'Tempahan Rasmi';
+
+      tbody.innerHTML += `
+        <tr>
+          <td>
+            <div class="fw-bold">${dateStr}</div>
+            <div class="small text-muted"><i class="fa fa-clock me-1"></i>${timeStr}</div>
+          </td>
+          <td><span class="fw-semibold">${labName}</span></td>
+          <td class="text-start">
+            <div><i class="fa fa-user me-1 text-primary"></i> ${applicant}</div>
+            <div class="small text-muted">${purpose}</div>
+          </td>
+          <td>
+            <span class="badge bg-danger px-2 py-1"><i class="fa fa-lock me-1"></i> Ditempah / Diambil</span>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  // Event Listeners
+  document.getElementById("searchInput").addEventListener("input", filterLabs);
+  document.getElementById("statusFilter").addEventListener("change", filterLabs);
+  document.getElementById("labFilterSelect").addEventListener("change", () => {
+    renderTimetable(allBookingsData);
+  });
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      }).catch(err => {
+        console.error("Logout error:", err);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>

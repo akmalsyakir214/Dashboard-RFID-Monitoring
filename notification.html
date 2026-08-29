@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications - Smart Access</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<style>
+  /* VARIABLE TEMA (DEFAULT LIGHT MODE) */
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #0d6efd;
+    --sidebar-mobile-bg: #021f4b;
+    --border-color: #eee;
+    --subtext-color: #666;
+    --time-color: #999;
+    
+    /* ICON BOX BACKGROUNDS */
+    --danger-bg: #ffe5e5;
+    --warning-bg: #fff4db;
+    --info-bg: #dbeafe;
+    --success-bg: #dcfce7;
+  }
+
+  /* DARK MODE OVERRIDES */
+  body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1e40af;
+    --sidebar-mobile-bg: #070f1e;
+    --border-color: #333333;
+    --subtext-color: #aaa;
+    --time-color: #777;
+
+    /* ICON BOX BACKGROUNDS (DARK) */
+    --danger-bg: #4c1d1d;
+    --warning-bg: #4d3800;
+    --info-bg: #1e3a5f;
+    --success-bg: #14532d;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* SIDEBAR DASHBOARD */
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    transition: background 0.3s;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { 
+    margin-top: 10px; 
+  }
+
+  .sidebar-menu {
+    display: block;
+  }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  /* MAIN CONTENT */
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+  }
+
+  .top-bar h3 {
+    color: var(--text-color);
+    margin: 0;
+  }
+
+  .mark-read {
+    text-decoration: none;
+    color: #0d6efd;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .mark-read:hover {
+    text-decoration: underline;
+  }
+
+  /* CARD & NOTIFICATION ITEM */
+  .notification-card {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .notification-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .notification-item:last-child {
+    border-bottom: none;
+  }
+
+  .icon-box {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .danger { background: var(--danger-bg); }
+  .warning { background: var(--warning-bg); }
+  .info { background: var(--info-bg); }
+  .success { background: var(--success-bg); }
+
+  .item-content { flex: 1; }
+  .item-content h6 { color: var(--text-color); margin-bottom: 4px; font-weight: 600; }
+  .item-content p { color: var(--subtext-color); font-size: 13px; margin: 0; }
+  .time { font-size: 13px; color: var(--time-color); }
+
+  /* RESPONSIVE UNTUK TELEFON (< 992px) */
+  @media (max-width: 991.98px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+
+    .logo {
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo i {
+      font-size: 1.8rem !important;
+    }
+
+    .logo h5 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      background: var(--sidebar-mobile-bg);
+      padding: 5px 0;
+    }
+
+    .sidebar a {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 15px;
+    }
+
+    .notification-card {
+      padding: 15px;
+    }
+
+    .notification-item {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .time {
+      align-self: flex-end;
+      font-size: 11px;
+    }
+  }
+</style>
+
+<!-- SKRIP SEGERA APABILA PAGE LOAD UNTUK ELAK SCREEN FLICKER -->
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+</head>
+<body>
+
+<!-- SIDEBAR DASHBOARD -->
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="users.html"><i class="fa fa-users"></i> Users</a>
+    <a href="booking.html"><i class="fa fa-calendar-check"></i> Bookings</a>
+    <a href="accesslog.html"><i class="fa fa-clock"></i> Access Log</a>
+    <a href="laboratory.html"><i class="fa fa-building"></i> Laboratories</a>
+    <a href="reports.html"><i class="fa fa-file"></i> Reports</a>
+    <a href="notification.html" class="active"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="help.html"><i class="fa fa-robot"></i> AI Assistant</a>
+    <a href="settings.html"><i class="fa fa-cog"></i> Settings</a>
+    <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+
+  <div class="top-bar flex-wrap gap-2">
+    <div class="d-flex align-items-center gap-3">
+      <h3>Notifications</h3>
+      <div id="adminHeaderName" class="text-muted fw-bold">Admin 👤</div>
+    </div>
+    <a href="#" class="mark-read" id="markReadBtn">Clear all notifications</a>
+  </div>
+
+  <div class="notification-card" id="notificationList">
+    <div class="text-center text-muted py-4">Memuatkan pemberitahuan...</div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- SCRIPT FIREBASE -->
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child, onValue, remove } from './firebase-config.js';
+
+  // 1. PELARASAN TEMA DARK / LIGHT MODE AUTOMATIK
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-mode");
+  }
+
+  // 2. KAWALAN AKSES PERANAN (ADMIN PROTECTION)
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let userRole = 'user';
+    let userName = user.displayName || user.email || 'Admin';
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.role) userRole = data.role.toString().toLowerCase();
+      if (data.name) userName = data.name;
+    } else {
+      const allUsersSnap = await get(child(dbRef, 'users'));
+      if (allUsersSnap.exists()) {
+        const allUsers = allUsersSnap.val();
+        Object.keys(allUsers).forEach(key => {
+          if (allUsers[key].email && allUsers[key].email.toLowerCase() === user.email.toLowerCase()) {
+            if (allUsers[key].role) userRole = allUsers[key].role.toString().toLowerCase();
+            if (allUsers[key].name) userName = allUsers[key].name;
+          }
+        });
+      }
+    }
+
+    if (userRole !== 'admin') {
+      alert("Akses ditolak! Halaman ini khusus untuk Pentadbir (Admin) sahaja.");
+      window.location.href = "user-dashboard.html";
+      return;
+    }
+
+    document.getElementById("adminHeaderName").innerText = `${userName} 👤`;
+  });
+
+  // 3. FUNGSI LOGOUT FIREBASE
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      
+      signOut(auth)
+        .then(() => {
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          console.error("Logout Error:", error);
+          alert("Gagal untuk log keluar. Sila cuba lagi.");
+        });
+    });
+  }
+
+  // 4. TARIK DATA NOTIFIKASI DARI REALTIME DATABASE SECARA REAL-TIME
+  const notificationList = document.getElementById("notificationList");
+  const notificationsRef = ref(db, 'notifications');
+
+  onValue(notificationsRef, (snapshot) => {
+    const data = snapshot.val();
+    notificationList.innerHTML = "";
+
+    if (data) {
+      const keys = Object.keys(data).reverse(); // Paparkan yang terkini di atas
+      
+      keys.forEach((key) => {
+        const item = data[key];
+        
+        let icon = '🔔';
+        let styleClass = 'info';
+        
+        const type = (item.type || '').toLowerCase();
+        if (type === 'danger' || type === 'alert' || type === 'unauthorized') {
+          icon = '❗';
+          styleClass = 'danger';
+        } else if (type === 'warning') {
+          icon = '⚠️';
+          styleClass = 'warning';
+        } else if (type === 'success' || type === 'user') {
+          icon = '✅';
+          styleClass = 'success';
+        } else if (type === 'maintenance' || type === 'info') {
+          icon = '🔧';
+          styleClass = 'info';
+        }
+
+        notificationList.innerHTML += `
+          <div class="notification-item">
+            <div class="d-flex align-items-center gap-3 w-100">
+              <div class="icon-box ${styleClass}">
+                ${icon}
+              </div>
+              <div class="item-content">
+                <h6>${item.title || 'Notification'}</h6>
+                <p>${item.message || ''}</p>
+              </div>
+            </div>
+            <div class="time ms-auto">
+              ${item.timestamp || item.time || ''}
+            </div>
+          </div>
+        `;
+      });
+    } else {
+      notificationList.innerHTML = `
+        <div class="text-center text-muted py-4">Tiada pemberitahuan baharu.</div>
+      `;
+    }
+  });
+
+  // 5. AKSI KOSONGKAN / PADAM SEMUA NOTIFIKASI
+  document.getElementById("markReadBtn").addEventListener("click", (e) => {
+    e.preventDefault();
+    if (confirm("Adakah anda pasti untuk memadam semua sejarah pemberitahuan?")) {
+      remove(notificationsRef).then(() => {
+        notificationList.innerHTML = `<div class="text-center text-muted py-4">Tiada pemberitahuan baharu.</div>`;
+        alert("Semua pemberitahuan telah dipadam.");
+      }).catch(err => {
+        console.error("Error clearing notifications:", err);
+        alert("Gagal mengemaskini pemberitahuan.");
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

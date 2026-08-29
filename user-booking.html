@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab Booking - Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #3b82f6;
+    --sidebar-mobile-bg: #021f4b;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+  }
+
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1d4ed8;
+    --sidebar-mobile-bg: #070f1e;
+    --border-color: #333333;
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { margin-top: 10px; }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  .custom-card {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+  }
+
+  .form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+  }
+
+  .table-custom {
+    color: var(--text-color);
+    background: var(--card-bg);
+  }
+
+  .table-custom th, .table-custom td {
+    border-color: var(--border-color);
+    color: var(--text-color);
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .logo { padding: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .logo i { font-size: 1.8rem !important; }
+    .logo h5 { margin: 0; font-size: 1.1rem; }
+    .sidebar-menu { display: flex; overflow-x: auto; white-space: nowrap; background: var(--sidebar-mobile-bg); padding: 5px 0; }
+    .sidebar a { padding: 10px 15px; font-size: 0.9rem; }
+    .content { margin-left: 0; padding: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="user-dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="user-labs.html"><i class="fa fa-door-open"></i> Status Makmal</a>
+    <a href="user-booking.html" class="active"><i class="fa fa-calendar-plus"></i> Lab Booking</a>
+    <a href="user-notifications.html"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="user-profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="user-settings.html"><i class="fa fa-gear"></i> Settings</a>
+    <a href="user-help.html"><i class="fa fa-robot"></i> AI Help Bot</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<div class="content">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">Lab Booking</h3>
+      <p class="text-muted small mb-0">Permohonan tempahan akses makmal pengguna.</p>
+    </div>
+    <div id="userHeaderName" class="fw-bold text-primary">User 👤</div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Bahagian Borang Tempahan -->
+    <div class="col-12 col-lg-5">
+      <div class="custom-card">
+        <h5 class="fw-bold mb-4"><i class="fa fa-edit me-2"></i>Borang Tempahan</h5>
+        <form id="bookingForm">
+          <div class="mb-3">
+            <label class="form-label">Pilih Makmal</label>
+            <select class="form-select" id="bookingLabSelect" required>
+              <option value="">-- Memuatkan Makmal --</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tarikh Tempahan</label>
+            <input type="date" class="form-control" id="bookingDate" required>
+          </div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label">Masa Mula</label>
+              <input type="time" class="form-control" id="bookingStartTime" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Masa Tamat</label>
+              <input type="time" class="form-control" id="bookingEndTime" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Tujuan / Catatan</label>
+            <textarea class="form-control" id="bookingReason" rows="3" placeholder="Sebab penggunaan makmal..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary w-100" id="submitBookingBtn">
+            <i class="fa fa-paper-plane me-1"></i> Hantar Permohonan
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Bahagian Senarai Status & Pembatalan -->
+    <div class="col-12 col-lg-7">
+      <div class="custom-card">
+        <h5 class="fw-bold mb-3"><i class="fa fa-list-check me-2"></i>Status Permohonan Saya</h5>
+        <div class="table-responsive">
+          <table class="table table-custom align-middle">
+            <thead>
+              <tr>
+                <th>Makmal</th>
+                <th>Tarikh & Masa</th>
+                <th>Tujuan</th>
+                <th>Status</th>
+                <th>Tindakan</th>
+              </tr>
+            </thead>
+            <tbody id="userBookingRequestsTable">
+              <tr>
+                <td colspan="5" class="text-center text-muted py-3">Memuatkan senarai permohonan...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child, push, set, onValue, update } from './firebase-config.js';
+
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+    document.body.classList.add("dark-mode");
+  }
+
+  let currentUserData = { uid: null, name: '', email: '', rfid: '' };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    currentUserData.uid = user.uid;
+    currentUserData.email = user.email ? user.email.toLowerCase() : "";
+    currentUserData.name = user.displayName || user.email || 'User';
+
+    const dbRef = ref(db);
+    let rfidUid = 'N/A';
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.name) currentUserData.name = data.name;
+      if (data.rfid) rfidUid = data.rfid;
+    }
+    currentUserData.rfid = rfidUid;
+
+    document.getElementById("userHeaderName").innerText = `${currentUserData.name} 👤`;
+
+    loadLaboratoriesOption();
+    loadUserBookings(user.uid);
+  });
+
+  async function loadLaboratoriesOption() {
+    const select = document.getElementById("bookingLabSelect");
+    const dbRef = ref(db);
+    const labsSnap = await get(child(dbRef, 'labs'));
+
+    select.innerHTML = `<option value="">-- Pilih Makmal --</option>`;
+
+    if (labsSnap.exists()) {
+      const labs = labsSnap.val();
+      Object.keys(labs).forEach(key => {
+        const labObj = labs[key];
+        const labName = labObj.name || labObj.labName || key;
+        select.innerHTML += `<option value="${labName}">${labName}</option>`;
+      });
+    } else {
+      select.innerHTML += `
+        <option value="Makmal Komputer 1">Makmal Komputer 1</option>
+        <option value="Makmal CyberSecurity">Makmal CyberSecurity</option>
+        <option value="Makmal Rangkaian">Makmal Rangkaian</option>
+      `;
+    }
+  }
+
+  document.getElementById("bookingForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const submitBtn = document.getElementById("submitBookingBtn");
+
+    const labName = document.getElementById("bookingLabSelect").value;
+    const date = document.getElementById("bookingDate").value;
+    const startTime = document.getElementById("bookingStartTime").value;
+    const endTime = document.getElementById("bookingEndTime").value;
+    const reason = document.getElementById("bookingReason").value.trim();
+
+    try {
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Hantar...";
+
+      const newRequestRef = push(ref(db, 'lab_requests'));
+      await set(newRequestRef, {
+        userId: currentUserData.uid,
+        userName: currentUserData.name,
+        userEmail: currentUserData.email,
+        userRfid: currentUserData.rfid,
+        labName: labName,
+        bookingDate: date,
+        timeSlot: `${startTime} - ${endTime}`,
+        reason: reason,
+        status: 'Pending',
+        createdAt: new Date().toISOString()
+      });
+
+      alert("Permohonan tempahan makmal berjaya dihantar!");
+      document.getElementById("bookingForm").reset();
+
+    } catch (err) {
+      console.error("Gagal menghantar tempahan:", err);
+      alert("Ralat: " + err.message);
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerText = "Hantar Permohonan";
+    }
+  });
+
+  function loadUserBookings(uid) {
+    const requestsRef = ref(db, 'lab_requests');
+    onValue(requestsRef, (snapshot) => {
+      const tableBody = document.getElementById("userBookingRequestsTable");
+      tableBody.innerHTML = "";
+
+      if (!snapshot.exists()) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Tiada permohonan dibuat.</td></tr>`;
+        return;
+      }
+
+      const requests = snapshot.val();
+      const myRequests = [];
+
+      Object.keys(requests).forEach(key => {
+        const item = requests[key];
+        if (item.userId === uid || (item.userEmail && item.userEmail.toLowerCase() === currentUserData.email)) {
+          myRequests.push({ id: key, ...item });
+        }
+      });
+
+      if (myRequests.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">Tiada permohonan dibuat.</td></tr>`;
+        return;
+      }
+
+      myRequests.reverse().forEach(item => {
+        const status = (item.status || 'Pending').toLowerCase();
+        let statusBadge = `<span class="badge bg-warning text-dark">Pending</span>`;
+        if (status === 'approved' || status === 'diluluskan') statusBadge = `<span class="badge bg-success">Approved</span>`;
+        if (status === 'rejected' || status === 'ditolak') statusBadge = `<span class="badge bg-danger">Rejected</span>`;
+        if (status === 'cancelled' || status === 'dibatalkan') statusBadge = `<span class="badge bg-secondary">Cancelled</span>`;
+
+        let actionButton = `<span class="text-muted small">-</span>`;
+        if (status === 'pending' || status === 'approved' || status === 'diluluskan') {
+          actionButton = `<button class="btn btn-outline-danger btn-sm cancel-btn" data-id="${item.id}">
+                            <i class="fa fa-ban me-1"></i> Batalkan
+                          </button>`;
+        }
+
+        tableBody.innerHTML += `
+          <tr>
+            <td><strong>${item.labName || item.lab || 'N/A'}</strong></td>
+            <td>${item.bookingDate || item.date || ''}<br><small class="text-muted">${item.timeSlot || item.time || ''}</small></td>
+            <td>${item.reason || item.purpose || ''}</td>
+            <td>${statusBadge}</td>
+            <td>${actionButton}</td>
+          </tr>
+        `;
+      });
+
+      // Attach event listeners for cancel buttons dynamically
+      document.querySelectorAll('.cancel-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const bookingId = e.currentTarget.getAttribute('data-id');
+          cancelBooking(bookingId);
+        });
+      });
+    });
+  }
+
+  async function cancelBooking(bookingId) {
+    if (confirm("Adakah anda pasti ingin membatalkan tempahan ini? Slot akan dibebaskan semula.")) {
+      try {
+        await update(ref(db, `lab_requests/${bookingId}`), {
+          status: 'Cancelled'
+        });
+        alert("Tempahan berjaya dibatalkan.");
+      } catch (error) {
+        console.error("Ralat membatalkan tempahan:", error);
+        alert("Gagal membatalkan tempahan. Sila cuba lagi.");
+      }
+    }
+  }
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      }).catch(err => {
+        console.error("Logout error:", err);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>

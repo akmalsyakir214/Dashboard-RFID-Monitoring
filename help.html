@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin AI Assistant - Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<!-- 1. SKRIP PENCEGAH FLICKER (MESTI DI ATAS HEAD) -->
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #0d6efd;
+    --sidebar-mobile-bg: #021f4b;
+    --border-color: #dee2e6;
+    --subtext-color: #6c757d;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+    --chat-bg-user: #0d6efd;
+    --chat-text-user: #ffffff;
+    --chat-bg-bot: #e9ecef;
+    --chat-text-bot: #212529;
+  }
+
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1e40af;
+    --sidebar-mobile-bg: #070f1e;
+    --border-color: #333333;
+    --subtext-color: #aaa;
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+    --chat-bg-user: #1d4ed8;
+    --chat-text-user: #ffffff;
+    --chat-bg-bot: #2a2a2a;
+    --chat-text-bot: #e0e0e0;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    transition: background 0.3s;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { margin-top: 10px; }
+
+  .sidebar-menu {
+    display: block;
+  }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  /* CHAT CONTAINER STYLES */
+  .chat-container {
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 140px);
+    transition: background 0.3s, border-color 0.3s;
+    border: 1px solid var(--border-color);
+  }
+
+  .chat-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .message {
+    max-width: 75%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .message.bot {
+    background: var(--chat-bg-bot);
+    color: var(--chat-text-bot);
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+  }
+
+  .message.user {
+    background: var(--chat-bg-user);
+    color: var(--chat-text-user);
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+  }
+
+  .chat-input-area {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    background: var(--card-bg);
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .form-control {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+  }
+
+  .form-control:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: #0d6efd;
+    box-shadow: none;
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar { 
+      width: 100%; 
+      height: auto; 
+      position: relative; 
+    }
+    .logo {
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .logo i { font-size: 1.8rem !important; }
+    .logo h5 { margin: 0; font-size: 1.1rem; }
+    .sidebar-menu {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      background: var(--sidebar-mobile-bg);
+      padding: 5px 0;
+    }
+    .sidebar a { padding: 10px 15px; font-size: 0.9rem; }
+    .content { margin-left: 0; padding: 15px; }
+    .chat-container { height: calc(100vh - 220px); }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="dashboard.html"><i class="fa fa-chart-line"></i> Dashboard</a>
+    <a href="users.html"><i class="fa fa-users"></i> Users</a>
+    <a href="booking.html"><i class="fa fa-calendar-check"></i> Bookings</a>
+    <a href="accesslog.html"><i class="fa fa-clock"></i> Access Log</a>
+    <a href="laboratory.html"><i class="fa fa-building"></i> Laboratories</a>
+    <a href="reports.html"><i class="fa fa-file"></i> Reports</a>
+    <a href="notification.html"><i class="fa fa-bell"></i> Notifications</a>
+    <a href="help.html" class="active"><i class="fa fa-robot"></i> AI Assistant</a>
+    <a href="settings.html"><i class="fa fa-cog"></i> Settings</a>
+    <a href="profile.html"><i class="fa fa-user"></i> Profile</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt"></i> Logout</a>
+  </div>
+</div>
+
+<div class="content">
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">Admin AI Assistant</h3>
+      <p class="text-muted small mb-0">Pembantu pintar pentadbir untuk pengurusan sistem Smart Access.</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 38px; height: 38px;" title="Tukar Mod Paparan">
+        <i class="fa fa-moon" id="themeIcon"></i>
+      </button>
+      <div id="userHeaderName" class="fw-bold text-primary">Admin 👤</div>
+    </div>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+        <i class="fa fa-robot"></i>
+      </div>
+      <div>
+        <h6 class="mb-0 fw-bold">Admin SmartBot AI</h6>
+        <small class="text-success"><i class="fa fa-circle fs-7 me-1"></i>Sedia membantu pengurusan sistem</small>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="message bot">
+        Selamat sejahtera, Tuan Admin! Saya pembantu maya sistem Smart Access. Ada apa-apa isu berkaitan pengurusan pengguna, status makmal, atau analitik laporan yang boleh saya bantu hari ini?
+      </div>
+    </div>
+
+    <div class="chat-input-area">
+      <form id="chatForm" class="d-flex gap-2">
+        <input type="text" id="chatInput" class="form-control" placeholder="Taip soalan atau arahan pentadbiran di sini..." autocomplete="off" required>
+        <button type="submit" class="btn btn-primary px-4" id="sendBtn">
+          <i class="fa fa-paper-plane"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child } from './firebase-config.js';
+
+  // 1. AUTO ACTIVE SIDEBAR MENU FIX
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname.split("/").pop();
+    document.querySelectorAll(".sidebar-menu a").forEach(link => {
+      if (link.getAttribute("href") === currentPath) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+  });
+
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const themeIcon = document.getElementById("themeIcon");
+
+  function updateThemeUI(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add("dark-mode");
+      document.body.classList.add("dark-mode");
+      themeIcon.classList.remove("fa-moon");
+      themeIcon.classList.add("fa-sun");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+      document.body.classList.remove("dark-mode");
+      themeIcon.classList.remove("fa-sun");
+      themeIcon.classList.add("fa-moon");
+    }
+  }
+
+  if (localStorage.getItem("theme") === "dark") {
+    updateThemeUI(true);
+  } else {
+    updateThemeUI(false);
+  }
+
+  themeToggleBtn.addEventListener("click", () => {
+    const isCurrentlyDark = document.documentElement.classList.contains("dark-mode");
+    if (isCurrentlyDark) {
+      localStorage.setItem("theme", "light");
+      updateThemeUI(false);
+    } else {
+      localStorage.setItem("theme", "dark");
+      updateThemeUI(true);
+    }
+  });
+
+  // 2. KAWALAN AKSES PERANAN (ADMIN PROTECTION) & PAPARAN NAMA
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let userRole = 'user';
+    let adminName = user.displayName || user.email || 'Admin';
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.role) userRole = data.role.toString().toLowerCase();
+      if (data.name) adminName = data.name;
+    } else {
+      const allUsersSnap = await get(child(dbRef, 'users'));
+      if (allUsersSnap.exists()) {
+        const allUsers = allUsersSnap.val();
+        Object.keys(allUsers).forEach(key => {
+          if (allUsers[key].email && allUsers[key].email.toLowerCase() === user.email.toLowerCase()) {
+            if (allUsers[key].role) userRole = allUsers[key].role.toString().toLowerCase();
+            if (allUsers[key].name) adminName = allUsers[key].name;
+          }
+        });
+      }
+    }
+
+    if (userRole !== 'admin') {
+      alert("Akses ditolak! Halaman ini khusus untuk Pentadbir (Admin) sahaja.");
+      window.location.href = "user-dashboard.html";
+      return;
+    }
+
+    document.getElementById("userHeaderName").innerText = `${adminName} 👤`;
+  });
+
+  // 3. FUNGSI CHAT BOT AI
+  const chatForm = document.getElementById("chatForm");
+  const chatInput = document.getElementById("chatInput");
+  const chatMessages = document.getElementById("chatMessages");
+
+  chatForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const question = chatInput.value.trim();
+    if (!question) return;
+
+    appendMessage(question, "user");
+    chatInput.value = "";
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    const typingId = appendMessage("SmartBot sedang menganalisis...", "bot text-muted fst-italic");
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    let botReply = getAdminFallbackResponse(question);
+
+    document.getElementById(typingId).remove();
+    appendMessage(botReply, "bot");
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+  function appendMessage(text, className) {
+    const id = "msg-" + Date.now() + Math.random();
+    const div = document.createElement("div");
+    div.id = id;
+    div.className = `message ${className}`;
+    div.innerText = text;
+    chatMessages.appendChild(div);
+    return id;
+  }
+
+  function getAdminFallbackResponse(q) {
+    const query = q.toLowerCase();
+
+    if (query.includes("user") || query.includes("pengguna") || query.includes("daftar")) {
+      return "Untuk menguruskan akaun pengguna, menambah akses kad RFID, atau mengubah peranan (role) pengguna, anda boleh pergi ke menu 'Users' di sebelah kiri.";
+    } 
+    else if (query.includes("booking") || query.includes("tempah") || query.includes("lulus")) {
+      return "Semua senarai permohonan tempahan makmal daripada pelajar boleh disemak dan diluluskan secara terus melalui menu 'Bookings'.";
+    } 
+    else if (query.includes("log") || query.includes("pintu") || query.includes("access")) {
+      return "Log akses keluar masuk pintu fizikal dan status percubaan kad RFID pengguna boleh dipantau dengan teliti melalui menu 'Access Log'.";
+    } 
+    else if (query.includes("laporan") || query.includes("report") || query.includes("stat")) {
+      return "Anda boleh menjana laporan ringkasan bulanan atau statistik penggunaan makmal menerusi menu 'Reports'.";
+    } 
+    else {
+      return "Sebagai pentadbir sistem Smart Access, anda mempunyai kawalan penuh terhadap pengguna, tempahan makmal, dan pemantauan log keselamatan. Ada konfigurasi spesifik yang anda ingin saya bantu semak?";
+    }
+  }
+
+  // 4. LOG KELUAR FIREBASE
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      }).catch(err => {
+        console.error("Logout Error:", err);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
