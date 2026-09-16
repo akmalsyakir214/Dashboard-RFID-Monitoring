@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pengurusan Tempahan - Admin Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<!-- Pustaka JSZip & pdfmake -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #0d6efd;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+    --table-text: #212529;
+  }
+
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1e40af;
+    --border-color: #333333;
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+    --table-text: #e0e0e0;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    transition: background 0.3s;
+    overflow-y: auto;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { margin-top: 10px; }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  .card-container {
+    background: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    transition: background 0.3s, border-color 0.3s;
+  }
+
+  .table {
+    color: var(--table-text);
+  }
+
+  .table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+  }
+
+  .time-badge {
+    display: inline-block;
+    background: rgba(13, 110, 253, 0.12);
+    color: #0d6efd;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin: 2px 2px 2px 0;
+  }
+
+  body.dark-mode .time-badge {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+  }
+
+  .btn-custom-csv {
+    background-color: #198754;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-custom-csv:hover {
+    background-color: #146c43;
+    color: #ffffff;
+  }
+
+  .btn-custom-print {
+    background-color: #ffc107;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 18px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s ease;
+  }
+
+  .btn-custom-print:hover {
+    background-color: #e0a800;
+    color: #ffffff;
+  }
+
+  @media (max-width: 991.98px) {
+    .sidebar { width: 100%; height: auto; position: relative; }
+    .content { margin-left: 0; padding: 15px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="dashboard.html"><i class="fa fa-chart-line me-2"></i> Dashboard</a>
+    <a href="users.html"><i class="fa fa-users me-2"></i> Users</a>
+    <a href="booking.html" class="active"><i class="fa fa-calendar-check me-2"></i> Bookings</a>
+    <a href="accesslog.html"><i class="fa fa-clock me-2"></i> Access Log</a>
+    <a href="laboratory.html"><i class="fa fa-building me-2"></i> Laboratories</a>
+    <a href="reports.html"><i class="fa fa-file me-2"></i> Reports</a>
+    <a href="settings.html"><i class="fa fa-cog me-2"></i> Settings</a>
+    <a href="profile.html"><i class="fa fa-user me-2"></i> Profile</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt me-2"></i> Logout</a>
+  </div>
+</div>
+
+<div class="content">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">Pengurusan Tempahan Makmal</h3>
+      <p class="text-muted small mb-0">Semak dan luluskan permohonan tempahan daripada pengguna.</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 38px; height: 38px;" title="Tukar Mod Paparan">
+        <i class="fa fa-moon" id="themeIcon"></i>
+      </button>
+      <div id="adminHeaderName" class="fw-bold text-primary">Admin 🛡️</div>
+    </div>
+  </div>
+
+  <div class="card-container">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <h5 class="mb-0 fw-bold"><i class="fa fa-list me-2"></i>Senarai Permohonan</h5>
+      <div class="d-flex gap-2">
+        <button id="exportExcelBtn" class="btn-custom-csv">
+          <i class="fa-solid fa-download"></i> Download CSV
+        </button>
+        <button id="printBtn" class="btn-custom-print">
+          <i class="fa-solid fa-print"></i> Print
+        </button>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Pengguna</th>
+            <th>Makmal</th>
+            <th>Tarikh & Masa</th>
+            <th>Tujuan</th>
+            <th>Status</th>
+            <th class="text-center">Tindakan</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsTableBody">
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">Memuatkan senarai tempahan...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPath = window.location.pathname.split("/").pop();
+    const sidebarLinks = document.querySelectorAll(".sidebar-menu a");
+
+    sidebarLinks.forEach(link => {
+      const href = link.getAttribute("href");
+      if (href === currentPath) {
+        link.classList.add("active");
+      }
+    });
+  });
+</script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child, update, onValue } from './firebase-config.js';
+
+  let currentBookingsExportData = [];
+
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const themeIcon = document.getElementById("themeIcon");
+
+  function updateThemeUI(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add("dark-mode");
+      document.body.classList.add("dark-mode");
+      themeIcon.classList.remove("fa-moon");
+      themeIcon.classList.add("fa-sun");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+      document.body.classList.remove("dark-mode");
+      themeIcon.classList.remove("fa-sun");
+      themeIcon.classList.add("fa-moon");
+    }
+  }
+
+  if (localStorage.getItem("theme") === "dark") {
+    updateThemeUI(true);
+  } else {
+    updateThemeUI(false);
+  }
+
+  themeToggleBtn.addEventListener("click", () => {
+    const isDark = document.documentElement.classList.contains("dark-mode");
+    localStorage.setItem("theme", isDark ? "light" : "dark");
+    updateThemeUI(!isDark);
+  });
+
+  // SEMAK SAMA ADA ADMIN DISAHKAN
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let adminName = user.displayName || 'Admin';
+
+    try {
+      const snapshot = await get(child(dbRef, `users/${user.uid}`));
+      if (snapshot.exists() && snapshot.val().name) {
+        adminName = snapshot.val().name;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    document.getElementById("adminHeaderName").innerText = `${adminName} 🛡️`;
+    loadBookingsData();
+  });
+
+  // BACA DATA MASA NYATA (REALTIME) DARI NODE 'lab_requests'
+  function loadBookingsData() {
+    const requestsRef = ref(db, 'lab_requests');
+    onValue(requestsRef, (snapshot) => {
+      const tbody = document.getElementById("bookingsTableBody");
+      tbody.innerHTML = "";
+      currentBookingsExportData = [];
+
+      if (!snapshot.exists()) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-4">Tiada permohonan tempahan ditemui.</td></tr>`;
+        return;
+      }
+
+      const bookingsData = snapshot.val();
+      const keys = Object.keys(bookingsData).reverse(); // Susun dari yang terkini
+
+      keys.forEach(requestId => {
+        const item = bookingsData[requestId];
+        const rawStatus = (item.status || 'pending').toLowerCase();
+
+        let badgeClass = 'bg-warning text-dark';
+        let statusText = 'Pending';
+
+        if (rawStatus === 'approved' || rawStatus === 'diluluskan') {
+          badgeClass = 'bg-success';
+          statusText = 'Approved';
+        } else if (rawStatus === 'rejected' || rawStatus === 'ditolak') {
+          badgeClass = 'bg-danger';
+          statusText = 'Rejected';
+        } else if (rawStatus === 'cancelled' || rawStatus === 'dibatalkan') {
+          badgeClass = 'bg-secondary';
+          statusText = 'Cancelled';
+        }
+
+        const userName = item.userName || item.name || 'Pengguna';
+        const userEmail = item.userEmail || item.email || '-';
+        const labName = item.labName || item.lab || 'Makmal';
+        const bookingDate = item.bookingDate || item.date || 'N/A';
+        const reason = item.reason || item.purpose || 'Tiada catatan';
+
+        let timeDisplay = "";
+        let plainTimeString = "";
+        if (item.timeSlots && Array.isArray(item.timeSlots) && item.timeSlots.length > 0) {
+          timeDisplay = item.timeSlots.map(t => `<span class="time-badge"><i class="fa-regular fa-clock me-1"></i>${t}</span>`).join(" ");
+          plainTimeString = item.timeSlots.join(", ");
+        } else if (item.timeSlot || item.time) {
+          const tVal = item.timeSlot || item.time;
+          timeDisplay = `<span class="time-badge"><i class="fa-regular fa-clock me-1"></i>${tVal}</span>`;
+          plainTimeString = tVal;
+        } else {
+          timeDisplay = `<small class="text-muted">N/A</small>`;
+          plainTimeString = "N/A";
+        }
+
+        currentBookingsExportData.push({
+          userName,
+          userEmail,
+          labName,
+          bookingDate,
+          timeString: plainTimeString,
+          reason,
+          status: statusText
+        });
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <div class="fw-bold">${userName}</div>
+              <small class="text-muted">${userEmail}</small>
+            </td>
+            <td><strong>${labName}</strong></td>
+            <td>
+              <div class="fw-bold mb-1">${bookingDate}</div>
+              <div>${timeDisplay}</div>
+            </td>
+            <td>${reason}</td>
+            <td><span class="badge ${badgeClass}">${statusText}</span></td>
+            <td class="text-center">
+              ${rawStatus === 'pending' ? `
+                <button onclick="window.updateStatus('${requestId}', 'Approved')" class="btn btn-sm btn-success me-1" title="Luluskan">
+                  <i class="fa fa-check me-1"></i> Lulus
+                </button>
+                <button onclick="window.updateStatus('${requestId}', 'Rejected')" class="btn btn-sm btn-danger" title="Tolak">
+                  <i class="fa fa-xmark me-1"></i> Tolak
+                </button>
+              ` : `
+                <button onclick="window.updateStatus('${requestId}', 'Pending')" class="btn btn-sm btn-outline-secondary" title="Tetapkan Semula ke Pending">
+                  <i class="fa fa-rotate-left me-1"></i> Semula
+                </button>
+              `}
+            </td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  // FUNGSI KEMASKINI STATUS TEMPAHAN DALAM FIREBASE
+  window.updateStatus = async function(requestId, newStatus) {
+    const actionMap = {
+      'Approved': 'meluluskan',
+      'Rejected': 'menolak',
+      'Pending': 'menetapkan semula'
+    };
+    
+    const actionText = actionMap[newStatus] || 'mengemaskini';
+
+    if (confirm(`Adakah anda pasti mahu ${actionText} tempahan ini?`)) {
+      try {
+        const targetRef = ref(db, `lab_requests/${requestId}`);
+        await update(targetRef, { 
+          status: newStatus,
+          updatedAt: new Date().toISOString()
+        });
+      } catch (error) {
+        console.error("Ralat kemas kini status:", error);
+        alert("Gagal mengemaskini status tempahan: " + error.message);
+      }
+    }
+  };
+
+  // LOGOUT
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => window.location.href = "index.html");
+    });
+  }
+
+  // FUNGSI EXPORT KE CSV
+  document.getElementById("exportExcelBtn").addEventListener("click", () => {
+    if (currentBookingsExportData.length === 0) {
+      alert("Tiada data tempahan untuk dieksport.");
+      return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+    csvContent += "No,Nama Pengguna,E-mel Pengguna,Makmal,Tarikh,Masa/Slot,Tujuan,Status\n";
+
+    currentBookingsExportData.forEach((item, index) => {
+      const cleanReason = `"${item.reason.replace(/"/g, '""')}"`;
+      const row = [
+        index + 1,
+        `"${item.userName}"`,
+        `"${item.userEmail}"`,
+        `"${item.labName}"`,
+        `"${item.bookingDate}"`,
+        `"${item.timeString}"`,
+        cleanReason,
+        `"${item.status}"`
+      ].join(",");
+      csvContent += row + "\n";
+    });
+
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Laporan_Tempahan_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  // FUNGSI CETAK (PRINT)
+  document.getElementById("printBtn").addEventListener("click", () => {
+    window.print();
+  });
+</script>
+
+</body>
+</html>
