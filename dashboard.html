@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Access - Dashboard</title>
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome untuk Icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js untuk Donut Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      background-color: #121622;
+      color: #fff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    /* Sidebar Styling */
+    .sidebar {
+      width: 250px;
+      height: 100vh;
+      background-color: #1a2035;
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding-top: 20px;
+      z-index: 100;
+    }
+    .sidebar .brand {
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 30px;
+      color: #fff;
+    }
+    .sidebar .nav-link {
+      color: #a0aec0;
+      padding: 12px 20px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      transition: all 0.3s;
+    }
+    .sidebar .nav-link:hover, .sidebar .nav-link.active {
+      background-color: #3182ce;
+      color: #fff;
+    }
+    .sidebar .nav-link i {
+      margin-right: 10px;
+    }
+    /* Main Content */
+    .main-content {
+      margin-left: 250px;
+      padding: 25px;
+    }
+    .top-navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+    /* Stat Cards */
+    .stat-card {
+      background: #1e2538;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border-left: 4px solid #3182ce;
+      margin-bottom: 20px;
+    }
+    .stat-card.success { border-left-color: #48bb78; }
+    .stat-card.danger { border-left-color: #e53e3e; }
+    .stat-card.warning { border-left-color: #ecc94b; }
+    .stat-card.info { border-left-color: #4fd1c5; }
+    
+    .stat-title {
+      font-size: 0.85rem;
+      color: #a0aec0;
+      font-weight: bold;
+    }
+    .stat-value {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-top: 5px;
+      margin-bottom: 0;
+    }
+
+    /* Container Jadual Asal & Chart */
+    .content-container {
+      display: flex;
+      gap: 20px;
+    }
+    .table-section {
+      flex: 2;
+      background: #1e2538;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .chart-section {
+      flex: 1;
+      background: #1e2538;
+      padding: 20px;
+      border-radius: 8px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="brand">
+      <i class="fa-solid fa-shield-halved fa-2x text-primary mb-2"></i><br>
+      SMART ACCESS
+    </div>
+    <ul class="nav flex-column px-2">
+      <li class="nav-item"><a class="nav-link active" href="#"><i class="fa-solid fa-chart-line"></i> Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-users"></i> Users</a></li>
+      <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-calendar-days"></i> Bookings</a></li>
+      <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-clock-rotate-left"></i> Access Log</a></li>
+      <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-door-closed"></i> Laboratories</a></li>
+      <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-chart-pie"></i> Reports</a></li>
+      <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-gear"></i> Settings</a></li>
+      <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-user"></i> Profile</a></li>
+      <li class="nav-item mt-4"><a class="nav-link text-danger" href="#"><i class="fa-solid fa-right-from-bracket"></i> Logout</a></li>
+    </ul>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    
+    <!-- TOP NAVBAR -->
+    <div class="top-navbar">
+      <h3 class="fw-bold m-0">Dashboard</h3>
+      <div class="user-profile">
+        <i class="fa-solid fa-circle-user fs-5 text-secondary me-2"></i>
+        <span class="fw-semibold">Puan Maslin</span>
+      </div>
+    </div>
+
+    <!-- STATS CARDS (Real-Time IDs Dimasukkan) -->
+    <div class="row">
+      <div class="col-md">
+        <div class="stat-card">
+          <div class="stat-title">Total Access</div>
+          <div id="total-access-val" class="stat-value">0</div>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="stat-card success">
+          <div class="stat-title">Successful Access</div>
+          <div id="success-access-val" class="stat-value text-success">0</div>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="stat-card danger">
+          <div class="stat-title">Failed Access</div>
+          <div id="failed-access-val" class="stat-value text-danger">0</div>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="stat-card warning">
+          <div class="stat-title">Today's Access</div>
+          <div id="todays-access-val" class="stat-value text-warning">0</div>
+        </div>
+      </div>
+      <div class="col-md">
+        <div class="stat-card info">
+          <div class="stat-title">Active Labs</div>
+          <div class="stat-value text-info">1</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BAHAGIAN JADUAL (ASAL ANDA DIKEKALKAN 100%) DAN CHART -->
+    <div class="row mt-3">
+      <!-- Jadual Asal Anda -->
+      <div class="col-lg-8">
+        <div class="table-section">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold m-0"><i class="fa-solid fa-calendar-days text-primary me-2"></i> Jadual Waktu Makmal Komputer</h5>
+            <select class="form-select form-select-sm w-auto bg-dark text-white border-secondary">
+              <option>Makmal Komputer 1</option>
+            </select>
+          </div>
+          <!-- Masukkan elemen jadual asal anda di sini tanpa ubah struktur -->
+          <div class="table-responsive text-muted text-center py-5">
+            [ Bahagian Jadual Waktu Asal Anda Kekal Di Sini ]
+          </div>
+        </div>
+      </div>
+
+      <!-- Access Distribution Chart (Real-Time) -->
+      <div class="col-lg-4">
+        <div class="chart-section">
+          <h5 class="fw-bold mb-3 text-start">Access Distribution</h5>
+          <div style="position: relative; height: 250px; width: 100%;">
+            <canvas id="accessDistributionChart"></canvas>
+          </div>
+          <div class="d-flex justify-content-center gap-4 mt-3 small">
+            <span><i class="fa-solid fa-square text-success"></i> Success</span>
+            <span><i class="fa-solid fa-square text-danger"></i> Failed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase App & Database Scripts (Compat Version v9) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+  <script>
+    // 1. Konfigurasi Firebase Pangkalan Data Anda
+    const firebaseConfig = {
+      apiKey: "AIzaSyDYY2-RZfe4RnRpE8ghToWnGfJQNcJF41g",
+      databaseURL: "https://rfid-access-and-security-default-rtdb.asia-southeast1.firebasedatabase.app"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Pembolehubah kaunter
+    let totalAccessCount = 0;
+    let successCount = 0;
+    let failedCount = 0;
+    let todaysCount = 0;
+
+    // 2. Setup Chart.js untuk Access Distribution (Donut Chart)
+    const ctx = document.getElementById('accessDistributionChart').getContext('2d');
+    const accessChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Success', 'Failed'],
+        datasets: [{
+          data: [0, 0],
+          backgroundColor: ['#28a745', '#dc3545'],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        }
+      }
+    });
+
+    // 3. Sambung secara Real-Time dengan Firebase /access_logs
+    const logsRef = db.ref('access_logs');
+
+    logsRef.on('child_added', (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      const status = data.status || ""; // Contoh: GRANTED_UNLOCK, GRANTED_LOCK, DENIED
+      const timestamp = data.timestamp || ""; // Format masa dari ESP32 (YYYY-MM-DD HH:MM:SS)
+
+      // Tambah nilai kaunter keseluruhan
+      totalAccessCount++;
+
+      // Kategori Success atau Failed
+      if (status.includes("GRANTED")) {
+        successCount++;
+      } else {
+        failedCount++;
+      }
+
+      // Semak sama ada imbasan berlaku pada hari ini
+      const todayDateStr = new Date().toISOString().split('T')[0];
+      if (timestamp.startsWith(todayDateStr)) {
+        todaysCount++;
+      }
+
+      // Kemaskini Nombor pada Kad Statistik Atas Secara Real-Time
+      document.getElementById('total-access-val').innerText = totalAccessCount;
+      document.getElementById('success-access-val').innerText = successCount;
+      document.getElementById('failed-access-val').innerText = failedCount;
+      document.getElementById('todays-access-val').innerText = todaysCount;
+
+      // Kemaskini Carta Donut Secara Real-Time Setiap Kali Kad Discan
+      accessChart.data.datasets[0].data = [successCount, failedCount];
+      accessChart.update();
+    });
+  </script>
+</body>
+</html>
