@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Dashboard - Smart Access</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+
+<style>
+  /* VARIABLE TEMA (DEFAULT LIGHT MODE) */
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-active: #3b82f6;
+    --sidebar-hover: #1e40af;
+    --sidebar-mobile-bg: #021f4b;
+    --border-color: #dee2e6;
+    --subtext-color: #6c757d;
+    --input-bg: #ffffff;
+    --input-text: #212529;
+  }
+
+  /* DARK MODE OVERRIDES */
+  html.dark-mode, body.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-active: #2563eb;
+    --sidebar-hover: #1d4ed8;
+    --sidebar-mobile-bg: #070f1e;
+    --border-color: #333333;
+    --subtext-color: #aaa;
+    --input-bg: #2d2d2d;
+    --input-text: #ffffff;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* SIDEBAR DASHBOARD */
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    transition: background 0.3s;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { 
+    margin-top: 10px; 
+  }
+
+  .sidebar-menu {
+    display: block;
+  }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover { 
+    background: var(--sidebar-hover); 
+  }
+
+  .sidebar a.active {
+    background: var(--sidebar-active) !important;
+    font-weight: 600;
+  }
+
+  /* MAIN CONTENT */
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .form-control, .form-select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--border-color);
+  }
+
+  .form-control:focus, .form-select:focus {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+  }
+
+  .table-custom {
+    color: var(--text-color);
+    background: var(--card-bg);
+  }
+
+  .table-custom th, .table-custom td {
+    border-color: var(--border-color);
+    background: transparent;
+    color: var(--text-color);
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  /* GAYA UNTUK JADUAL WAKTU MAKMAL */
+  .timetable-container {
+    overflow-x: auto;
+  }
+
+  .timetable-style {
+    font-size: 0.82rem;
+    border-color: var(--border-color) !important;
+    min-width: 900px;
+  }
+
+  .timetable-style th {
+    background-color: var(--sidebar-bg) !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    padding: 8px 4px;
+    text-align: center;
+  }
+
+  .timetable-style th small {
+    font-size: 0.65rem;
+    font-weight: normal;
+    opacity: 0.85;
+  }
+
+  .timetable-style td {
+    padding: 10px 4px;
+    vertical-align: middle;
+    text-align: center;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  /* INTERAKTIF: SLOTS KOSONG & BERISI */
+  .slot-free {
+    cursor: pointer;
+    background-color: rgba(25, 135, 84, 0.05) !important;
+  }
+  
+  .slot-free:hover {
+    background-color: rgba(25, 135, 84, 0.2) !important;
+    transform: scale(1.02);
+    font-weight: bold;
+    color: #198754 !important;
+  }
+
+  .slot-busy {
+    cursor: not-allowed;
+    background-color: rgba(220, 53, 69, 0.08) !important;
+    border: 1px solid rgba(220, 53, 69, 0.25) !important;
+  }
+
+  .slot-busy:hover {
+    background-color: rgba(220, 53, 69, 0.18) !important;
+  }
+
+  html.dark-mode .slot-busy {
+    background-color: rgba(220, 53, 69, 0.2) !important;
+  }
+
+  /* RESPONSIVE UNTUK TELEFON (< 992px) */
+  @media (max-width: 991.98px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+
+    .logo {
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo i {
+      font-size: 1.8rem !important;
+    }
+
+    .logo h5 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      background: var(--sidebar-mobile-bg);
+      padding: 5px 0;
+    }
+
+    .sidebar a {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 15px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="user-dashboard.html"><i class="fa fa-chart-line me-2"></i> Dashboard</a>
+    <a href="user-labs.html"><i class="fa fa-door-open me-2"></i> Status Makmal</a>
+    <a href="user-booking.html"><i class="fa fa-calendar-plus me-2"></i> Lab Booking</a>
+    <a href="user-profile.html"><i class="fa fa-user me-2"></i> Profile</a>
+    <a href="user-settings.html"><i class="fa fa-gear me-2"></i> Settings</a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt me-2"></i> Logout</a>
+  </div>
+</div>
+
+<div class="content">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0">User Dashboard</h3>
+      <p class="text-muted small mb-0">Selamat datang ke Portal Smart Access Portal Pengguna.</p>
+    </div>
+    <div id="userHeaderName" class="fw-bold text-primary">User 👤</div>
+  </div>
+
+  <!-- Kad Statistik Asas -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-md-4">
+      <div class="stat-card d-flex align-items-center justify-content-between">
+        <div>
+          <h6 class="text-muted mb-1">Status RFID Tag</h6>
+          <h4 class="mb-0 text-success" id="rfidTagDisplay">Loading...</h4>
+        </div>
+        <i class="fa fa-id-card fa-2x text-success"></i>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="stat-card d-flex align-items-center justify-content-between">
+        <div>
+          <h6 class="text-muted mb-1">Jumlah Imbasan Saya</h6>
+          <h4 class="mb-0 text-primary" id="totalScansDisplay">0</h4>
+        </div>
+        <i class="fa fa-door-open fa-2x text-primary"></i>
+      </div>
+    </div>
+    <div class="col-12 col-md-4">
+      <div class="stat-card d-flex align-items-center justify-content-between">
+        <div>
+          <h6 class="text-muted mb-1">Makmal Dibenarkan</h6>
+          <h4 class="mb-0 text-info" id="allowedLabsDisplay">0</h4>
+        </div>
+        <i class="fa fa-building fa-2x text-info"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- BAHAGIAN JADUAL WAKTU MAKMAL -->
+  <div class="stat-card mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+      <div>
+        <h5 class="fw-bold mb-1"><i class="fa-solid fa-calendar-days text-primary me-2"></i>Jadual Penggunaan Makmal</h5>
+        <p class="text-muted small mb-0">Klik pada slot masa yang <strong>KOSONG</strong> untuk menempah slot secara terus.</p>
+      </div>
+      <div>
+        <select id="labSelect" class="form-select form-select-sm">
+          <option value="Makmal Komputer 1" selected>Makmal Komputer 1</option>
+          <option value="Makmal Komputer 2">Makmal Komputer 2</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="timetable-container">
+      <table class="table table-bordered align-middle mb-0 timetable-style">
+        <thead>
+          <tr>
+            <th style="width: 100px;">Hari / Masa</th>
+            <th>1<br><small>7:30-8:00</small></th>
+            <th>2<br><small>8:00-8:30</small></th>
+            <th>3<br><small>8:30-9:00</small></th>
+            <th>4<br><small>9:00-9:30</small></th>
+            <th>5<br><small>9:30-10:00</small></th>
+            <th>6<br><small>10:00-10:30</small></th>
+            <th>7<br><small>10:30-11:00</small></th>
+            <th>8<br><small>11:00-11:30</small></th>
+            <th>9<br><small>11:30-12:00</small></th>
+            <th>10<br><small>12:00-12:30</small></th>
+            <th>11<br><small>12:30-13:00</small></th>
+            <th>12<br><small>13:00-13:30</small></th>
+            <th>13<br><small>13:30-14:00</small></th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- ISNIN -->
+          <tr>
+            <td class="fw-bold bg-light">Monday</td>
+            <td class="slot-free" onclick="bookSlot('Monday', '7:30-8:00')">+ Tempah</td>
+            <td colspan="3" class="slot-busy" onclick="alertBusy('Isnin (8:00 - 9:30 AM)', '5 SK')">
+              <span class="fw-bold text-dark d-block">5 SK</span>
+            </td>
+            <td class="slot-free" onclick="bookSlot('Monday', '9:30-10:00')">+ Tempah</td>
+            <td colspan="2" class="slot-busy" onclick="alertBusy('Isnin (10:00 - 11:00 AM)', '6RK4 / 6RK5 / 6RS2')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6RK4/6RK5/6RS2</strong>
+            </td>
+            <td class="slot-free" onclick="bookSlot('Monday', '11:00-11:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Monday', '11:30-12:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Monday', '12:00-12:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Monday', '12:30-13:00')">+ Tempah</td>
+            <td colspan="2" class="slot-busy" onclick="alertBusy('Isnin (1:00 - 2:00 PM)', '6AK5 / 6AK4')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6AK5 / 6AK4</strong>
+            </td>
+          </tr>
+
+          <!-- SELASA -->
+          <tr>
+            <td class="fw-bold bg-light">Tuesday</td>
+            <td colspan="3" class="slot-busy" onclick="alertBusy('Selasa (7:30 - 9:00 AM)', '6AK5 / 6AK4')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6AK5 / 6AK4</strong>
+            </td>
+            <td class="slot-free" onclick="bookSlot('Tuesday', '9:00-9:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Tuesday', '9:30-10:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Tuesday', '10:00-10:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Tuesday', '10:30-11:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Tuesday', '11:00-11:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Tuesday', '11:30-12:00')">+ Tempah</td>
+            <td colspan="4" class="slot-busy" onclick="alertBusy('Selasa (12:00 - 2:00 PM)', '6RK4 / 6RK5 / 6RS2')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6RK4/6RK5/6RS2</strong>
+            </td>
+          </tr>
+
+          <!-- RABU -->
+          <tr>
+            <td class="fw-bold bg-light">Wednesday</td>
+            <td colspan="3" class="slot-busy" onclick="alertBusy('Rabu (7:30 - 9:00 AM)', '5 SK')">
+              <span class="fw-bold text-dark d-block">5 SK</span>
+            </td>
+            <td class="slot-free" onclick="bookSlot('Wednesday', '9:00-9:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Wednesday', '9:30-10:00')">+ Tempah</td>
+            <td colspan="2" class="slot-busy" onclick="alertBusy('Rabu (10:00 - 11:00 AM)', '6RK4 / 6RK5 / 6RS2')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6RK4/6RK5/6RS2</strong>
+            </td>
+            <td class="slot-free" onclick="bookSlot('Wednesday', '11:00-11:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Wednesday', '11:30-12:00')">+ Tempah</td>
+            <td colspan="4" class="slot-busy" onclick="alertBusy('Rabu (12:00 - 2:00 PM)', '6AK5 / 6AK4')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6AK5 / 6AK4</strong>
+            </td>
+          </tr>
+
+          <!-- KHAMIS -->
+          <tr>
+            <td class="fw-bold bg-light">Thursday</td>
+            <td colspan="3" class="slot-busy" onclick="alertBusy('Khamis (7:30 - 9:00 AM)', '6RK4 / 6RK5 / 6RS2')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6RK4/6RK5/6RS2</strong>
+            </td>
+            <td colspan="2" class="slot-busy" onclick="alertBusy('Khamis (9:30 - 10:30 AM)', '6AK5 / 6AK4')">
+              <small class="d-block text-muted" style="font-size:0.65rem;">ICT/EKO</small>
+              <strong>6AK5 / 6AK4</strong>
+            </td>
+            <td class="slot-free" onclick="bookSlot('Thursday', '10:30-11:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Thursday', '11:00-11:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Thursday', '11:30-12:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Thursday', '12:00-12:30')">+ Tempah</td>
+            <td colspan="3" class="slot-busy" onclick="alertBusy('Khamis (12:30 - 2:00 PM)', '4 SK')">
+              <span class="fw-bold text-dark d-block">4 SK</span>
+            </td>
+          </tr>
+
+          <!-- JUMAAT -->
+          <tr>
+            <td class="fw-bold bg-light">Friday</td>
+            <td colspan="3" class="slot-busy" onclick="alertBusy('Jumaat (7:30 - 9:00 AM)', '4 SK')">
+              <span class="fw-bold text-dark d-block">4 SK</span>
+            </td>
+            <td class="slot-free" onclick="bookSlot('Friday', '9:00-9:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '9:30-10:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '10:00-10:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '10:30-11:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '11:00-11:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '11:30-12:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '12:00-12:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '12:30-13:00')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '13:00-13:30')">+ Tempah</td>
+            <td class="slot-free" onclick="bookSlot('Friday', '13:30-14:00')">+ Tempah</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PETUNJUK COLOR-CODING -->
+    <div class="d-flex align-items-center gap-4 mt-3 small text-muted">
+      <div class="d-flex align-items-center gap-2">
+        <span style="width:15px; height:15px; background:rgba(220, 53, 69, 0.15); border:1px solid rgba(220, 53, 69, 0.4); border-radius:3px; display:inline-block;"></span>
+        <span>Sudah Ditempah / Ada Kelas (Tidak Boleh Klik)</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span style="width:15px; height:15px; background:rgba(25, 135, 84, 0.1); border:1px solid rgba(25, 135, 84, 0.3); border-radius:3px; display:inline-block;"></span>
+        <span>Slot Kosong (Klik untuk Tempah)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sejarah Akses Terkini Saya -->
+  <div class="stat-card mb-4">
+    <h5 class="fw-bold mb-3"><i class="fa fa-history me-2"></i>Sejarah Akses Terkini Saya</h5>
+    
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-md-8">
+        <div class="input-group">
+          <span class="input-group-text bg-transparent border-end-0">
+            <i class="fa fa-search text-muted"></i>
+          </span>
+          <input type="text" id="searchInput" class="form-control border-start-0 ps-0" placeholder="Cari mengikut nama makmal...">
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <select id="statusFilter" class="form-select">
+          <option value="all">Semua Status (All)</option>
+          <option value="granted">Dibenarkan (Granted)</option>
+          <option value="denied">Ditolak (Denied)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-custom align-middle mb-0">
+        <thead>
+          <tr>
+            <th style="width: 50px;">#</th>
+            <th>Lokasi / Makmal</th>
+            <th>Masa & Tarikh</th>
+            <th>Kad RFID</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="userAccessLogTable">
+          <tr>
+            <td colspan="5" class="text-center text-muted py-4">Memuatkan log akses...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- SCRIPT DIKEMAS KINI UNTUK PERMULAAN TEMPAHAN (LANGKAH 1) -->
+<script>
+  // Mesej Amaran Bagi Slot Berisi
+  function alertBusy(dayTime, className) {
+    alert(`❌ MAAF, SLOT SUDAH DIISI!\n\nPada waktu ${dayTime}, Makmal ini digunakan oleh kelas [${className}]. Sila pilih slot yang lain.`);
+  }
+
+  // Helper: Format masa ke HH:mm (contoh: "9:30" -> "09:30")
+  function formatTime(tStr) {
+    const parts = tStr.trim().split(":");
+    const h = parts[0].padStart(2, '0');
+    const m = parts[1] ? parts[1].padStart(2, '0') : "00";
+    return `${h}:${m}`;
+  }
+
+  // Helper: Dapatkan tarikh YYYY-MM-DD bagi hari terdekat
+  function getNextDateForDay(dayName) {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const targetIdx = days.indexOf(dayName);
+    if (targetIdx === -1) return "";
+
+    const today = new Date();
+    const currentIdx = today.getDay();
+    let distance = targetIdx - currentIdx;
+    if (distance < 0) {
+      distance += 7; // Ambil hari tersebut pada minggu hadapan jika sudah lepas
+    }
+    
+    today.setDate(today.getDate() + distance);
+    
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  }
+
+  // Fungsi Lencongkan ke Lab Booking jika Slot Kosong
+  function bookSlot(day, timeRange) {
+    const selectedLab = document.getElementById("labSelect").value;
+    
+    // Pecahkan masa "9:30-10:00" -> startTime: "09:30", endTime: "10:00"
+    const times = timeRange.split("-");
+    const startTime = formatTime(times[0]);
+    const endTime = formatTime(times[1]);
+    
+    // Kirim tarikh mengikut hari yang dipilih
+    const calculatedDate = getNextDateForDay(day);
+
+    const bookingDetails = {
+      lab: selectedLab,
+      day: day,
+      date: calculatedDate,
+      startTime: startTime,
+      endTime: endTime
+    };
+
+    // Simpan ke LocalStorage untuk dibaca oleh user-booking.html
+    localStorage.setItem("autoSelectBooking", JSON.stringify(bookingDetails));
+
+    alert(`✅ SLOT KOSONG DIPILIH!\n\nMakmal: ${selectedLab}\nHari: ${day} (${calculatedDate})\nMasa: ${startTime} - ${endTime}\n\nSistem akan membawa anda ke muka surat 'Lab Booking'...`);
+    
+    // Redirect ke page Lab Booking
+    window.location.href = "user-booking.html";
+  }
+
+  // Auto Detect Menu Aktif Navigation
+  document.addEventListener("DOMContentLoaded", () => {
+    const currentPage = window.location.pathname.split("/").pop();
+    const menuLinks = document.querySelectorAll(".sidebar-menu a");
+
+    menuLinks.forEach(link => {
+      const linkPage = link.getAttribute("href");
+      if (linkPage === currentPage || (currentPage === "" && linkPage === "user-dashboard.html")) {
+        link.classList.add("active");
+      } else {
+        link.classList.remove("active");
+      }
+    });
+  });
+</script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, get, child, onValue } from './firebase-config.js';
+
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+    document.body.classList.add("dark-mode");
+  }
+
+  let userEmailCurrent = "";
+  let userRfidCurrent = "N/A";
+  let rawUserLogs = [];
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    userEmailCurrent = user.email ? user.email.toLowerCase() : "";
+    const dbRef = ref(db);
+
+    let userName = user.displayName || user.email || 'User';
+    let allowedLabsCount = 0;
+
+    const snapshot = await get(child(dbRef, `users/${user.uid}`));
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      if (data.name) userName = data.name;
+      if (data.rfid) userRfidCurrent = data.rfid.toUpperCase();
+      if (data.allowedLabs) allowedLabsCount = Object.keys(data.allowedLabs).length;
+    } else {
+      const allUsersSnap = await get(child(dbRef, 'users'));
+      if (allUsersSnap.exists()) {
+        const allUsers = allUsersSnap.val();
+        Object.keys(allUsers).forEach(key => {
+          if (allUsers[key].email && allUsers[key].email.toLowerCase() === userEmailCurrent) {
+            if (allUsers[key].name) userName = allUsers[key].name;
+            if (allUsers[key].rfid) userRfidCurrent = allUsers[key].rfid.toUpperCase();
+            if (allUsers[key].allowedLabs) allowedLabsCount = Object.keys(allUsers[key].allowedLabs).length;
+          }
+        });
+      }
+    }
+
+    document.getElementById("userHeaderName").innerText = `${userName} 👤`;
+    document.getElementById("rfidTagDisplay").innerText = userRfidCurrent;
+    document.getElementById("allowedLabsDisplay").innerText = allowedLabsCount;
+
+    loadUserAccessLogs();
+  });
+
+  function loadUserAccessLogs() {
+    const logsRef = ref(db, 'access_logs');
+    onValue(logsRef, (snapshot) => {
+      rawUserLogs = [];
+
+      if (snapshot.exists()) {
+        const logs = snapshot.val();
+
+        Object.keys(logs).forEach(key => {
+          const item = logs[key];
+          const logEmail = (item.email || '').toLowerCase();
+          const logRfid = (item.rfid || item.cardUid || item.uid || '').toUpperCase();
+
+          if ((userEmailCurrent && logEmail === userEmailCurrent) || (userRfidCurrent !== 'N/A' && logRfid === userRfidCurrent)) {
+            rawUserLogs.push(item);
+          }
+        });
+
+        rawUserLogs.reverse();
+      }
+
+      document.getElementById("totalScansDisplay").innerText = rawUserLogs.length;
+      renderLogTable();
+    });
+  }
+
+  function renderLogTable() {
+    const tableBody = document.getElementById("userAccessLogTable");
+    const searchVal = document.getElementById("searchInput").value.toLowerCase();
+    const statusVal = document.getElementById("statusFilter").value;
+
+    tableBody.innerHTML = "";
+
+    const filteredLogs = rawUserLogs.filter(item => {
+      const labName = (item.labName || item.location || 'Makmal Komputer').toLowerCase();
+      const statusText = (item.status || '').toLowerCase();
+      const isGranted = statusText === 'granted' || statusText === 'success' || statusText === 'dibenarkan';
+
+      const matchesSearch = labName.includes(searchVal);
+      let matchesStatus = true;
+
+      if (statusVal === 'granted') {
+        matchesStatus = isGranted;
+      } else if (statusVal === 'denied') {
+        matchesStatus = !isGranted;
+      }
+
+      return matchesSearch && matchesStatus;
+    });
+
+    if (filteredLogs.length === 0) {
+      tableBody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Tiada rekod imbasan ditemui.</td></tr>`;
+      return;
+    }
+
+    filteredLogs.forEach((item, index) => {
+      const statusTextRaw = (item.status || '').toLowerCase();
+      const isGranted = statusTextRaw === 'granted' || statusTextRaw === 'success' || statusTextRaw === 'dibenarkan';
+      
+      const badgeClass = isGranted ? 'bg-success' : 'bg-danger';
+      const statusLabel = isGranted ? 'Granted' : 'Denied';
+
+      tableBody.innerHTML += `
+        <tr>
+          <td>${index + 1}</td>
+          <td><strong>${item.labName || item.location || 'Makmal Komputer'}</strong></td>
+          <td>${item.timestamp || item.datetime || 'N/A'}</td>
+          <td><code>${item.rfid || item.cardUid || item.uid || userRfidCurrent}</code></td>
+          <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+        </tr>
+      `;
+    });
+  }
+
+  document.getElementById("searchInput").addEventListener("input", renderLogTable);
+  document.getElementById("statusFilter").addEventListener("change", renderLogTable);
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      signOut(auth).then(() => {
+        window.location.href = "index.html";
+      }).catch(err => {
+        console.error("Logout error:", err);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
