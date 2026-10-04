@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n="pageTitle">Pengurusan Pengguna - Admin Smart Access</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
+
+<style>
+  /* VARIABLE TEMA (DEFAULT LIGHT MODE) */
+  :root {
+    --bg-color: #f4f6f9;
+    --text-color: #212529;
+    --card-bg: #ffffff;
+    --sidebar-bg: #032b67;
+    --sidebar-hover: #0d6efd;
+    --sidebar-mobile-bg: #021f4b;
+    --table-border: #dee2e6;
+    --muted-color: #6c757d;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --modal-bg: #ffffff;
+  }
+
+  /* DARK MODE OVERRIDES */
+  body.dark-mode, html.dark-mode {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --sidebar-bg: #0b192c;
+    --sidebar-hover: #1e40af;
+    --sidebar-mobile-bg: #070f1e;
+    --table-border: #333333;
+    --muted-color: #a0a0a0;
+    --input-bg: #2b2b2b;
+    --input-border: #444444;
+    --modal-bg: #1e1e1e;
+  }
+
+  body { 
+    background: var(--bg-color); 
+    color: var(--text-color);
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* LAPTOP / DESKTOP VIEW */
+  .sidebar { 
+    width: 240px; 
+    height: 100vh; 
+    background: var(--sidebar-bg); 
+    position: fixed; 
+    color: white; 
+    top: 0; 
+    left: 0; 
+    z-index: 1000;
+    transition: background 0.3s;
+    overflow-y: auto;
+  }
+
+  .logo { 
+    text-align: center; 
+    padding: 20px; 
+    border-bottom: 1px solid rgba(255,255,255,.2); 
+  }
+
+  .logo h5 { 
+    margin-top: 10px; 
+  }
+
+  .sidebar-menu {
+    display: block;
+  }
+
+  .sidebar a { 
+    display: block; 
+    color: white; 
+    text-decoration: none; 
+    padding: 12px 20px; 
+    transition: background 0.2s;
+  }
+
+  .sidebar a:hover, .sidebar a.active { 
+    background: var(--sidebar-hover); 
+  }
+
+  .content { 
+    margin-left: 240px; 
+    padding: 20px; 
+  }
+
+  .table-box { 
+    background: var(--card-bg); 
+    color: var(--text-color);
+    padding: 20px; 
+    border-radius: 10px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,.15); 
+    transition: background 0.3s, color 0.3s;
+    border: 1px solid var(--table-border);
+  }
+
+  html.dark-mode .table,
+  body.dark-mode .table {
+    color: var(--text-color);
+    border-color: var(--table-border);
+  }
+
+  html.dark-mode .table th, 
+  html.dark-mode .table td,
+  body.dark-mode .table th, 
+  body.dark-mode .table td {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    border-color: var(--table-border);
+  }
+
+  html.dark-mode .modal-content,
+  body.dark-mode .modal-content {
+    background-color: var(--modal-bg);
+    color: var(--text-color);
+    border-color: var(--table-border);
+  }
+  html.dark-mode .modal-header,
+  html.dark-mode .modal-footer,
+  body.dark-mode .modal-header,
+  body.dark-mode .modal-footer {
+    border-color: var(--table-border);
+  }
+  html.dark-mode .btn-close,
+  body.dark-mode .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+  }
+
+  html.dark-mode .form-control,
+  html.dark-mode .form-select,
+  body.dark-mode .form-control,
+  body.dark-mode .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-color);
+    border-color: var(--input-border);
+  }
+  html.dark-mode .form-control::placeholder,
+  body.dark-mode .form-control::placeholder {
+    color: #a0a0a0;
+  }
+
+  /* PHONE VIEW (< 992px) */
+  @media (max-width: 991.98px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+
+    .logo {
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .logo i {
+      font-size: 1.8rem !important;
+    }
+
+    .logo h5 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .sidebar-menu {
+      display: flex;
+      overflow-x: auto;
+      white-space: nowrap;
+      background: var(--sidebar-mobile-bg);
+      padding: 5px 0;
+    }
+
+    .sidebar a {
+      padding: 10px 15px;
+      font-size: 0.9rem;
+    }
+
+    .content {
+      margin-left: 0;
+      padding: 15px;
+    }
+
+    .table-box {
+      padding: 15px;
+    }
+  }
+</style>
+
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark-mode");
+  }
+</script>
+</head>
+<body>
+
+<!-- SIDEBAR ADMIN -->
+<div class="sidebar">
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved fa-3x"></i>
+    <h5>SMART ACCESS</h5>
+  </div>
+  <div class="sidebar-menu">
+    <a href="dashboard.html"><i class="fa fa-chart-line me-2"></i> <span data-i18n="menuDashboard">Dashboard</span></a>
+    <a href="users.html" class="active"><i class="fa fa-users me-2"></i> <span data-i18n="menuUsers">Users</span></a>
+    <a href="booking.html"><i class="fa fa-calendar-check me-2"></i> <span data-i18n="menuBookings">Bookings</span></a>
+    <a href="accesslog.html"><i class="fa fa-clock me-2"></i> <span data-i18n="menuAccessLog">Access Log</span></a>
+    <a href="laboratory.html"><i class="fa fa-building me-2"></i> <span data-i18n="menuLaboratories">Laboratories</span></a>
+    <a href="reports.html"><i class="fa fa-file me-2"></i> <span data-i18n="menuReports">Reports</span></a>
+    <a href="settings.html"><i class="fa fa-cog me-2"></i> <span data-i18n="menuSettings">Settings</span></a>
+    <a href="profile.html"><i class="fa fa-user me-2"></i> <span data-i18n="menuProfile">Profile</span></a>
+    <a href="#" id="logoutBtn"><i class="fa fa-sign-out-alt me-2"></i> <span data-i18n="menuLogout">Logout</span></a>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="content">
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+      <h3 class="mb-0" data-i18n="pageHeader">Pengurusan Pengguna</h3>
+      <p class="text-muted small mb-0" data-i18n="pageSubHeader">Urus akaun pengguna dan tetapan peranan sistem.</p>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <button id="themeToggleBtn" class="btn btn-sm btn-outline-secondary rounded-circle" style="width: 38px; height: 38px;" title="Tukar Mod Paparan">
+        <i class="fa fa-moon" id="themeIcon"></i>
+      </button>
+      <div id="adminNameDisplay" class="fw-bold text-primary" data-i18n="loadingText">Admin 👤</div>
+    </div>
+  </div>
+
+  <!-- JADUAL PENGGUNA & BUTANG TAMBAH -->
+  <div class="row g-3">
+    <div class="col-12">
+      <div class="table-box">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+          <h5 class="m-0 fw-semibold"><i class="fa fa-list me-2"></i><span data-i18n="registeredUsersTitle">Pengguna Berdaftar</span></h5>
+          <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal" onclick="resetForm()">
+            <i class="fa fa-plus me-1"></i> <span data-i18n="addNewUserBtn">Tambah Pengguna Baharu</span>
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle text-center mb-0">
+            <thead>
+              <tr>
+                <th data-i18n="thUid">UID</th>
+                <th data-i18n="thName">Nama</th>
+                <th data-i18n="thEmail">E-mel</th>
+                <th data-i18n="thRole">Peranan</th>
+                <th data-i18n="thStatus">Status</th>
+                <th data-i18n="thAction">Tindakan</th>
+              </tr>
+            </thead>
+            <tbody id="userTable">
+              <tr><td colspan="6" class="text-muted" data-i18n="loadingUsers">Memuatkan pengguna...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ADD / EDIT USER -->
+<div class="modal fade" id="userModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="userModalTitle" data-i18n="modalTitleAdd">Tambah Pengguna Baharu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="email" id="email" class="form-control mb-3" placeholder="E-mel (cth. user@gmail.com)" required>
+        <input type="password" id="password" class="form-control mb-3" placeholder="Kata Laluan (Min 6 aksara)">
+        <input type="text" id="uid" class="form-control mb-3" placeholder="Tag UID (Dijana secara automatik)" readonly>
+        <input type="text" id="name" class="form-control mb-3" placeholder="Nama Penuh" required>
+        <select id="role" class="form-select">
+          <option value="user" data-i18n="roleUser">Pengguna</option>
+          <option value="admin" data-i18n="roleAdmin">Pentadbir</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="btnCancel">Batal</button>
+        <button class="btn btn-primary" id="saveUserBtn" data-i18n="btnSaveUser">Simpan Pengguna</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script type="module">
+  import { auth, signOut, onAuthStateChanged, db, ref, update, get, child, onValue, remove } from './firebase-config.js';
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signOut as secondarySignOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+  const firebaseConfig = auth.app.options;
+
+  // KAMUS TERJEMAHAN BAHASA (EN & MS)
+  const translations = {
+    en: {
+      pageTitle: "User Management - Admin Smart Access",
+      menuDashboard: "Dashboard",
+      menuUsers: "Users",
+      menuBookings: "Bookings",
+      menuAccessLog: "Access Log",
+      menuLaboratories: "Laboratories",
+      menuReports: "Reports",
+      menuSettings: "Settings",
+      menuProfile: "Profile",
+      menuLogout: "Logout",
+      pageHeader: "User Management",
+      pageSubHeader: "Manage user accounts and system role settings.",
+      loadingText: "Loading...",
+      registeredUsersTitle: "Registered Users",
+      addNewUserBtn: "Add New User",
+      thUid: "UID",
+      thName: "Name",
+      thEmail: "Email",
+      thRole: "Role",
+      thStatus: "Status",
+      thAction: "Action",
+      loadingUsers: "Loading users...",
+      noUsersFound: "No users found",
+      statusActive: "Active",
+      modalTitleAdd: "Add New User",
+      modalTitleEdit: "Edit User",
+      roleUser: "User",
+      roleAdmin: "Admin",
+      btnCancel: "Cancel",
+      btnSaveUser: "Save User",
+      alertAccessDenied: "Access denied! This page is for administrators only.",
+      alertLogoutFailed: "Failed to log out. Please try again.",
+      alertFillNameEmail: "Please fill in Name and Email!",
+      alertPasswordLength: "Please enter a password with at least 6 characters for a new account!",
+      successUserUpdated: "User updated successfully!",
+      successUserRegistered: "User successfully registered to Authentication & Database!",
+      alertSaveFailed: "Failed to save user: ",
+      confirmDeleteUser: "Delete this user from Realtime Database?",
+      alertDeleteFailed: "Failed to delete user."
+    },
+    ms: {
+      pageTitle: "Pengurusan Pengguna - Admin Smart Access",
+      menuDashboard: "Papan Utama",
+      menuUsers: "Pengguna",
+      menuBookings: "Tempahan",
+      menuAccessLog: "Log Akses",
+      menuLaboratories: "Makmal",
+      menuReports: "Laporan",
+      menuSettings: "Tetapan",
+      menuProfile: "Profil",
+      menuLogout: "Log Keluar",
+      pageHeader: "Pengurusan Pengguna",
+      pageSubHeader: "Urus akaun pengguna dan tetapan peranan sistem.",
+      loadingText: "Memuatkan...",
+      registeredUsersTitle: "Pengguna Berdaftar",
+      addNewUserBtn: "Tambah Pengguna Baharu",
+      thUid: "UID",
+      thName: "Nama",
+      thEmail: "E-mel",
+      thRole: "Peranan",
+      thStatus: "Status",
+      thAction: "Tindakan",
+      loadingUsers: "Memuatkan pengguna...",
+      noUsersFound: "Tiada pengguna ditemui",
+      statusActive: "Aktif",
+      modalTitleAdd: "Tambah Pengguna Baharu",
+      modalTitleEdit: "Sunting Pengguna",
+      roleUser: "Pengguna",
+      roleAdmin: "Pentadbir",
+      btnCancel: "Batal",
+      btnSaveUser: "Simpan Pengguna",
+      alertAccessDenied: "Akses ditolak! Halaman ini khusus untuk Pentadbir sahaja.",
+      alertLogoutFailed: "Gagal untuk log keluar. Sila cuba lagi.",
+      alertFillNameEmail: "Sila isi Nama dan E-mel!",
+      alertPasswordLength: "Sila masukkan kata laluan sekurang-kurangnya 6 aksara untuk akaun baharu!",
+      successUserUpdated: "Pengguna berjaya dikemaskini!",
+      successUserRegistered: "Pengguna berjaya didaftarkan ke Authentication & Database!",
+      alertSaveFailed: "Gagal menyimpan pengguna: ",
+      confirmDeleteUser: "Padam pengguna ini dari Realtime Database?",
+      alertDeleteFailed: "Gagal memadam pengguna."
+    }
+  };
+
+  function setLanguage(lang) {
+    const t = translations[lang] || translations.en;
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const key = el.getAttribute("data-i18n");
+      if (t[key]) {
+        if (el.tagName === "TITLE") {
+          document.title = t[key];
+        } else {
+          el.innerText = t[key];
+        }
+      }
+    });
+  }
+
+  // Muatkan bahasa semasa mengikut localStorage
+  const currentLang = localStorage.getItem("language") || "ms";
+  setLanguage(currentLang);
+
+  const themeToggleBtn = document.getElementById("themeToggleBtn");
+  const themeIcon = document.getElementById("themeIcon");
+
+  function updateThemeUI(isDark) {
+    if (isDark) {
+      document.documentElement.classList.add("dark-mode");
+      document.body.classList.add("dark-mode");
+      themeIcon.classList.remove("fa-moon");
+      themeIcon.classList.add("fa-sun");
+    } else {
+      document.documentElement.classList.remove("dark-mode");
+      document.body.classList.remove("dark-mode");
+      themeIcon.classList.remove("fa-sun");
+      themeIcon.classList.add("fa-moon");
+    }
+  }
+
+  if (localStorage.getItem("theme") === "dark") {
+    updateThemeUI(true);
+  } else {
+    updateThemeUI(false);
+  }
+
+  themeToggleBtn.addEventListener("click", () => {
+    const isDark = document.documentElement.classList.contains("dark-mode");
+    localStorage.setItem("theme", isDark ? "light" : "dark");
+    updateThemeUI(!isDark);
+  });
+
+  // SEMAK ADALAH ADMIN DISAHKAN
+  onAuthStateChanged(auth, async (user) => {
+    const langNow = localStorage.getItem("language") || "ms";
+    const tMsg = translations[langNow] || translations.ms;
+
+    if (!user) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    const dbRef = ref(db);
+    let userRole = 'user';
+    let userName = user.email || 'Admin';
+
+    try {
+      const snapshot = await get(child(dbRef, `users/${user.uid}`));
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        if (data.role) userRole = data.role.toString().toLowerCase();
+        if (data.name) userName = data.name;
+      } else {
+        const allUsersSnap = await get(child(dbRef, 'users'));
+        if (allUsersSnap.exists()) {
+          const allUsers = allUsersSnap.val();
+          Object.keys(allUsers).forEach(key => {
+            if (allUsers[key].email && allUsers[key].email.toLowerCase() === user.email.toLowerCase()) {
+              if (allUsers[key].role) userRole = allUsers[key].role.toString().toLowerCase();
+              if (allUsers[key].name) userName = allUsers[key].name;
+            }
+          });
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (userRole !== 'admin') {
+      alert(tMsg.alertAccessDenied);
+      window.location.href = "user-dashboard.html";
+      return;
+    }
+
+    document.getElementById("adminNameDisplay").innerText = `${userName} 👤`;
+  });
+
+  // LOGOUT
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const langNow = localStorage.getItem("language") || "ms";
+      const tMsg = translations[langNow] || translations.ms;
+
+      signOut(auth)
+        .then(() => {
+          window.location.href = "index.html";
+        })
+        .catch((error) => {
+          console.error("Logout Error:", error);
+          alert(tMsg.alertLogoutFailed);
+        });
+    });
+  }
+
+  // MEMAPARKAN PENGGUNA DARI REALTIME DATABASE
+  const usersRef = ref(db, 'users');
+
+  onValue(usersRef, (snapshot) => {
+    const table = document.getElementById("userTable");
+    table.innerHTML = "";
+    const data = snapshot.val();
+
+    const langNow = localStorage.getItem("language") || "ms";
+    const tMsg = translations[langNow] || translations.ms;
+
+    if (data) {
+      Object.keys(data).forEach((key) => {
+        const user = data[key];
+        const role = user.role || 'user';
+        const uName = user.name || 'N/A';
+        const email = user.email || 'N/A';
+        const displayUid = user.uid || key;
+
+        table.innerHTML += `
+          <tr>
+            <td><code class="text-primary">${displayUid}</code></td>
+            <td>${uName}</td>
+            <td>${email}</td>
+            <td><span class="badge bg-secondary">${role}</span></td>
+            <td class="text-success fw-bold">${tMsg.statusActive}</td>
+            <td>
+              <button class="btn btn-warning btn-sm me-1" onclick="window.editUser('${displayUid}', '${uName}', '${email}', '${role}')">
+                <i class="fa fa-edit"></i>
+              </button>
+              <button class="btn btn-danger btn-sm" onclick="window.deleteUser('${key}')">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+          </tr>`;
+      });
+    } else {
+      table.innerHTML = `<tr><td colspan="6" class="text-muted">${tMsg.noUsersFound}</td></tr>`;
+    }
+  });
+
+  const modalEl = document.getElementById('userModal');
+  const bsModal = new bootstrap.Modal(modalEl);
+
+  // SIMPAN PENGGUNA DENGAN PENDAFTARAN FIREBASE AUTHENTICATION
+  document.getElementById("saveUserBtn").addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    let uid = document.getElementById("uid").value.trim();
+    const name = document.getElementById("name").value.trim();
+    const role = document.getElementById("role").value;
+
+    const langNow = localStorage.getItem("language") || "ms";
+    const tMsg = translations[langNow] || translations.ms;
+
+    const isEdit = document.getElementById("uid").readOnly && uid !== "";
+
+    if (!name || !email) {
+      return alert(tMsg.alertFillNameEmail);
+    }
+
+    try {
+      if (!isEdit) {
+        if (!password || password.length < 6) {
+          return alert(tMsg.alertPasswordLength);
+        }
+
+        const secondaryApp = initializeApp(firebaseConfig, "SecondaryApp");
+        const secondaryAuth = getAuth(secondaryApp);
+
+        const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+        const newUser = userCredential.user;
+        uid = newUser.uid;
+
+        await secondarySignOut(secondaryAuth);
+      }
+
+      await update(ref(db, `users/${uid}`), {
+        uid: uid,
+        email: email,
+        name: name,
+        role: role.toLowerCase(),
+        updatedAt: Date.now()
+      });
+
+      alert(isEdit ? tMsg.successUserUpdated : tMsg.successUserRegistered);
+      bsModal.hide();
+      window.resetForm();
+
+    } catch (err) {
+      console.error("Ralat pendaftaran:", err);
+      alert(tMsg.alertSaveFailed + err.message);
+    }
+  });
+
+  window.editUser = function(uid, name, email, role) {
+    const langNow = localStorage.getItem("language") || "ms";
+    const tMsg = translations[langNow] || translations.ms;
+
+    document.getElementById("userModalTitle").innerText = tMsg.modalTitleEdit;
+    document.getElementById("uid").value = uid;
+    document.getElementById("uid").readOnly = true;
+    document.getElementById("email").value = email === 'N/A' ? '' : email;
+    document.getElementById("email").readOnly = true;
+    document.getElementById("password").placeholder = "(Biarkan kosong jika tidak ubah)";
+    document.getElementById("name").value = name;
+    document.getElementById("role").value = role.toLowerCase() === 'admin' ? 'admin' : 'user';
+    bsModal.show();
+  };
+
+  window.deleteUser = function(key) {
+    const langNow = localStorage.getItem("language") || "ms";
+    const tMsg = translations[langNow] || translations.ms;
+
+    if (confirm(tMsg.confirmDeleteUser)) {
+      remove(ref(db, `users/${key}`)).catch(err => {
+        console.error("Error deleting user:", err);
+        alert(tMsg.alertDeleteFailed);
+      });
+    }
+  };
+
+  window.resetForm = function() {
+    const langNow = localStorage.getItem("language") || "ms";
+    const tMsg = translations[langNow] || translations.ms;
+
+    document.getElementById("userModalTitle").innerText = tMsg.modalTitleAdd;
+    document.getElementById("uid").readOnly = true;
+    document.getElementById("email").readOnly = false;
+    document.getElementById("uid").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("password").placeholder = "Kata Laluan (Min 6 aksara)";
+    document.getElementById("name").value = "";
+    document.getElementById("role").value = "user";
+  };
+</script>
+</body>
+</html>
